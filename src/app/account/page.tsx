@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Cloud, Download, HardDrive, KeyRound, Mail, WifiOff } from "lucide-react";
+import { Cloud, Download, HardDrive, KeyRound, WifiOff } from "lucide-react";
 import { useSync } from "@/components/SyncProvider";
 import { AiSettings } from "@/components/AiSettings";
 import { PageHeader, Badge, Progress } from "@/components/ui";
@@ -21,7 +21,6 @@ export default function Account() {
       <AiSettings />
       <Offline />
       <Backup />
-      {syncConfigured && <OwnerNotes settings={settings.data} />}
     </div>
   );
 }
@@ -341,29 +340,6 @@ function Setup() {
         <li>In Vercel → Settings → Environment Variables, add <code>NEXT_PUBLIC_SUPABASE_URL</code> and <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, then redeploy. Locally, copy <code>.env.example</code> to <code>.env.local</code>.</li>
       </ol>
     </div>
-  );
-}
-
-function OwnerNotes({ settings }: { settings: AuthSettings | null }) {
-  return (
-    <details className="card-flat p-4 text-sm">
-      <summary className="cursor-pointer font-semibold"><Mail size={15} className="mr-1.5 inline" />For the site owner: email verification and sign-in methods</summary>
-      <div className="mt-3 space-y-2 text-muted">
-        <p>
-          Email verification needs an SMTP server: Supabase&apos;s built-in mailer only sends a few emails per hour, and only to your project team.
-          Connect a free one under <b>Authentication → Emails → SMTP Settings</b> and keep <b>Confirm email</b> on.
-          {settings && <> Confirm email is currently <Badge tone={settings.autoconfirm ? "muted" : "good"}>{settings.autoconfirm ? "off" : "on"}</Badge>.</>}
-        </p>
-        <ul className="list-disc space-y-1.5 pl-5">
-          <li><b>Gmail</b> (no domain needed, ~500 emails/day): turn on 2-step verification, create an app password, then use host <code>smtp.gmail.com</code>, port <code>465</code>, your Gmail address as user and sender, and the app password.</li>
-          <li><b>Brevo</b> (300 emails/day free): verify your sender address in Brevo, then copy its SMTP host, login and key.</li>
-          <li><b>Resend</b> (3,000/month free): best deliverability, but you need your own domain to email anyone besides yourself.</li>
-          <li><b>GitHub / Google:</b> add an OAuth app with callback <code>https://YOUR-PROJECT.supabase.co/auth/v1/callback</code> under Providers. {settings && <><Badge tone={settings.github ? "good" : "muted"}>GitHub {settings.github ? "on" : "off"}</Badge> <Badge tone={settings.google ? "good" : "muted"}>Google {settings.google ? "on" : "off"}</Badge></>}</li>
-          <li><b>Private app:</b> after creating your account, turn off <b>Allow new users to sign up</b>.</li>
-        </ul>
-        <p>Your progress is stored in <b>Table Editor → progress</b>: one row per user, with all data in the <code>data</code> column.</p>
-      </div>
-    </details>
   );
 }
 
