@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
-import { BIZ_WORDS, HSK_LEVELS, levelLabel, loadLevel, loadLevels, useAsync, type Word } from "@/lib/data";
+import { BIZ_WORDS, HSK_LEVELS, levelLabel, loadLevel, loadLevels, OFFLINE_MISSING, useAsync, type Word } from "@/lib/data";
 import { parsePinyin } from "@/lib/pinyin";
 import { bankWord } from "@/lib/resolve";
 import { addCards, useAppState, useHydrated } from "@/lib/store";
@@ -90,7 +90,7 @@ function Browser() {
         </div>
       </div>
 
-      {data.error && <p className="text-accent">Couldn&apos;t load words: {data.error}</p>}
+      {data.error && <p className="text-accent">{data.error === OFFLINE_MISSING ? data.error : `Couldn’t load words: ${data.error}`}</p>}
       <ul className="card divide-y divide-line overflow-hidden">
         {filtered.slice(0, limit).map((w) => (
           <li key={w.id}>

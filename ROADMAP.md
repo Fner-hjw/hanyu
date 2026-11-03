@@ -13,7 +13,7 @@ a guided path and progress tracking.
 | 4 | Handwriting trainer + radicals, 61 grammar points, 21 dialogues with role-play | done |
 | 5 | Adaptive placement + generated mock exams, numbers & money trainer, progress & study plan | done |
 | 6 | Mistakes notebook, personal word bank, games, installable app (PWA) | done |
-| 7 (next) | Offline mode (service worker), native-speaker content review, AI conversation partner, more readings/dialogues, HSKK speaking test, writing (sentence composition) practice | planned |
+| 7 (in progress) | Account rework + email/password/OAuth sign-in (done); offline mode (done); AI connection with your own key + conversation partner + writing feedback; more finance readings/dialogues; HSKK speaking test; independent content audit | in progress |
 
 Each phase ends with a green build, lint, browser smoke test and a commit.
 

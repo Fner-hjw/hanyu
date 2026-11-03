@@ -34,14 +34,21 @@ export { HSK_LEVELS, levelLabel, LEVEL_SIZES, levelOfId } from "./levels";
 import { HSK_LEVELS, levelLabel, LEVEL_SIZES } from "./levels";
 
 /* ---------- fetch + cache ---------- */
+export const OFFLINE_MISSING = "You're offline and this content isn't saved on this device yet. Next time you're online, download it under Account → Offline.";
 const cache = new Map<string, Promise<unknown>>();
 function getJson<T>(path: string): Promise<T> {
   let p = cache.get(path);
   if (!p) {
-    p = fetch(path).then((r) => {
-      if (!r.ok) throw new Error(`${path}: ${r.status}`);
-      return r.json();
-    });
+    p = fetch(path).then(
+      (r) => {
+        if (!r.ok) throw new Error(`${path}: ${r.status}`);
+        return r.json();
+      },
+      (e) => {
+        if (typeof navigator !== "undefined" && !navigator.onLine) throw new Error(OFFLINE_MISSING);
+        throw e;
+      },
+    );
     p.catch(() => cache.delete(path));
     cache.set(path, p);
   }
@@ -110,7 +117,7 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]): { data: T | 
     let live = true;
     fn().then(
       (data) => live && setState({ key, data, error: null }),
-      (e) => live && setState({ key, data: null, error: String(e) }),
+      (e) => live && setState({ key, data: null, error: e instanceof Error ? e.message : String(e) }),
     );
     return () => { live = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps

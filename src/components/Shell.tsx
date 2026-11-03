@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { ChevronDown, Ellipsis, Flame, UserRound, CalendarCheck, Layers, Route, LayoutGrid } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronDown, CloudOff, Ellipsis, Flame, UserRound, CalendarCheck, Layers, Route, LayoutGrid } from "lucide-react";
 import { GROUPS, NAV, visibleNav, type NavItem } from "@/lib/nav";
 import { useSync } from "./SyncProvider";
+import { registerServiceWorker, useOnline } from "@/lib/offline";
 import { streak, useAppState, useHydrated } from "@/lib/store";
 
 const isActive = (path: string, href: string) => (href === "/" ? path === "/" : path === href || path.startsWith(href + "/"));
@@ -26,9 +27,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const { status, email } = useSync();
   /** Practice is collapsed by default; null = follow the current page */
   const [practiceOpen, setPracticeOpen] = useState<boolean | null>(null);
+  const online = useOnline();
+  useEffect(() => registerServiceWorker(), []);
   const items = visibleNav();
   const days = hydrated ? streak(s) : 0;
-  const dot = { synced: "bg-good", syncing: "bg-gold", error: "bg-accent", idle: "bg-line", "signed-out": "bg-line", off: "" }[status];
+  const dot = { synced: "bg-good", syncing: "bg-gold", error: "bg-accent", idle: "bg-line", "signed-out": "bg-line", offline: "bg-line", off: "" }[status];
 
   const tabs = [
     { href: "/", label: "Today", icon: CalendarCheck },
@@ -58,7 +61,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             </span>
             <span className="min-w-0 leading-tight">
               <span className="block truncate font-semibold">{email ?? "Account"}</span>
-              <span className="block truncate text-xs text-muted">{email ? (status === "error" ? "Sync error" : "Synced across devices") : "Sign in to sync"}</span>
+              <span className="block truncate text-xs text-muted">{email ? (status === "error" ? "Sync error" : status === "offline" ? "Will sync when online" : "Synced across devices") : "Sign in to sync"}</span>
             </span>
           </Link>
           <span className="flex shrink-0 items-center gap-1 px-1 text-sm" title={`${days} day streak`}>
@@ -102,6 +105,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <Link href="/account" aria-label="Account" className="relative"><UserRound size={20} />{dot && <span className={`absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full ${dot}`} />}</Link>
           </div>
         </header>
+        {!online && (
+          <div role="status" className="flex items-center justify-center gap-2 border-b border-line bg-gold-soft px-4 py-1.5 text-center text-xs font-medium text-fg/80">
+            <CloudOff size={14} className="shrink-0" /> Offline. Your progress is saved on this device{email ? " and will sync when you're back online" : ""}.
+          </div>
+        )}
         <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 lg:px-8 lg:pb-12 lg:pt-8">{children}</main>
         <footer className="mx-auto max-w-5xl px-4 pb-24 text-xs text-muted lg:px-8 lg:pb-8">
           Data: HSK 3.1 syllabus · CC-CEDICT (CC BY-SA 4.0) · HSK sentences &amp; audio by no7z (CC BY-SA 4.0) · Wikimedia CCD.

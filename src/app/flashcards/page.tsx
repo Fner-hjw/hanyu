@@ -5,7 +5,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Ear, Info, Keyboard, Layers, PenLine, Quote, Repeat } from "lucide-react";
 import { Rating, type Grade } from "ts-fsrs";
-import { BIZ_WORDS, DECKS, LEVEL_SIZES, levelLabel, sentenceAudio, type Word } from "@/lib/data";
+import { BIZ_WORDS, DECKS, LEVEL_SIZES, levelLabel, OFFLINE_MISSING, sentenceAudio, type Word } from "@/lib/data";
 import { deckCounts, planSession } from "@/lib/resolve";
 import { checkPinyin } from "@/lib/pinyin";
 import { playUrl, speak, stopAll } from "@/lib/audio";
@@ -129,7 +129,7 @@ function SessionLoader({ deck, onExit }: { deck: string; onExit: () => void }) {
     import("@/lib/store").then(({ getState }) => planSession(deck, getState())).then((p) => live && setPlan(p), (e) => live && setError(String(e)));
     return () => { live = false; };
   }, [deck]);
-  if (error) return <p className="text-accent">Couldn&apos;t load deck: {error}</p>;
+  if (error) return <p className="text-accent">{error === OFFLINE_MISSING ? error : `Couldn’t load deck: ${error}`}</p>;
   if (!plan) return <p className="text-muted">Preparing your session…</p>;
   return <Session deck={deck} plan={plan} onExit={onExit} />;
 }

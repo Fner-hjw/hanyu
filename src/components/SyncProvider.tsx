@@ -6,7 +6,7 @@ import { getSupabase, syncConfigured, type OAuthProvider } from "@/lib/supabase"
 import { fingerprint, mergeStates } from "@/lib/merge";
 import { DEFAULT_STATE, getState, replaceState, useAppState, type AppState } from "@/lib/store";
 
-type Status = "off" | "signed-out" | "idle" | "syncing" | "synced" | "error";
+type Status = "off" | "signed-out" | "idle" | "syncing" | "synced" | "offline" | "error";
 type Ctx = {
   status: Status;
   email: string | null;
@@ -72,6 +72,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
 
   const sync = useCallback(async () => {
     if (!sb || !uid) return;
+    if (!navigator.onLine) { setStatus("offline"); return; }
     if (busy.current) { again.current = true; return; }
     busy.current = true;
     setStatus("syncing");
@@ -114,8 +115,15 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!uid) return;
     const onVis = () => document.visibilityState === "visible" && void sync();
+    const onOnline = () => void sync();
     document.addEventListener("visibilitychange", onVis);
-    return () => document.removeEventListener("visibilitychange", onVis);
+    window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOnline); // marks the status as offline
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("offline", onOnline);
+    };
   }, [uid, sync]);
 
   const signIn = useCallback(async (addr: string) => {

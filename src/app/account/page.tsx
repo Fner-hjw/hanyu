@@ -1,10 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Cloud, HardDrive, KeyRound, Mail } from "lucide-react";
+import { Cloud, Download, HardDrive, KeyRound, Mail, WifiOff } from "lucide-react";
 import { useSync } from "@/components/SyncProvider";
-import { PageHeader, Badge } from "@/components/ui";
-import { useAsync } from "@/lib/data";
+import { PageHeader, Badge, Progress } from "@/components/ui";
+import { useAsync, levelLabel } from "@/lib/data";
+import { clearOffline, downloadForOffline, offlineStatus, offlineSupported } from "@/lib/offline";
 import { getAuthSettings, syncConfigured, type AuthSettings, type OAuthProvider } from "@/lib/supabase";
 import { exportData, importData, resetData, todayKey, useAppState, useHydrated } from "@/lib/store";
 
@@ -16,6 +17,7 @@ export default function Account() {
       <PageHeader title="Account & sync" subtitle="Your progress is always saved on this device. Sign in to back it up and use it on your other devices." />
       <Storage />
       {!syncConfigured ? <Setup /> : recovery ? <NewPassword /> : email ? <SignedIn /> : <SignInCard settings={settings.data} loading={settings.loading} />}
+      <Offline />
       <Backup />
       {syncConfigured && <OwnerNotes settings={settings.data} />}
     </div>
@@ -210,6 +212,82 @@ function SignedIn() {
           {pwMsg && <p className={`mt-2 ${pwMsg.ok ? "text-good" : "text-accent"}`}>{pwMsg.text}</p>}
         </details>
       )}
+    </div>
+  );
+}
+
+/* ---------- offline ---------- */
+function Offline() {
+  const s = useAppState();
+  const hydrated = useHydrated();
+  const [tick, setTick] = useState(0);
+  const status = useAsync(offlineStatus, [tick]);
+  const deckLevel = /^hsk-(\d)$/.exec(s.settings.deck)?.[1];
+  const [levels, setLevels] = useState<number[] | null>(null);
+  const chosen = levels ?? [deckLevel ? +deckLevel : Math.max(1, s.settings.targetLevel - 1)];
+  const [dict, setDict] = useState(true);
+  const [prog, setProg] = useState<{ done: number; total: number } | null>(null);
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const st = status.data;
+  if (!hydrated) return null;
+  if (!offlineSupported()) {
+    return <div className="card p-5 text-sm text-muted">This browser doesn&apos;t support offline mode.</div>;
+  }
+  const busy = !!prog && prog.done < prog.total;
+  return (
+    <div className="card space-y-3 p-5">
+      <div className="flex flex-wrap items-center gap-2 font-semibold">
+        <WifiOff size={18} /> Offline
+        {st && <Badge tone={st.active ? "good" : "muted"}>{st.active ? "on" : "starting"}</Badge>}
+      </div>
+      <p className="text-sm text-muted">
+        Pages and audio you use are saved automatically, so they work without internet next time. Download the rest ahead of a trip.
+      </p>
+      {st && (
+        <p className="text-sm">
+          Saved now: <b>{st.pages}</b> pages, <b>{st.dataFiles}</b> data files, <b>{st.audio}</b> audio {st.audio === 1 ? "clip" : "clips"} · {st.usageMB} MB used
+          {st.persisted && <span className="text-muted"> · protected from automatic cleanup</span>}
+        </p>
+      )}
+      <div>
+        <div className="eyebrow mb-1.5">Lesson units to include</div>
+        <div className="flex flex-wrap gap-1.5">
+          {[1, 2, 3, 4, 5, 6, 7].map((l) => (
+            <button key={l} type="button" className="chip" data-active={chosen.includes(l)} disabled={busy}
+              onClick={() => setLevels(chosen.includes(l) ? chosen.filter((x) => x !== l) : [...chosen, l].sort())}>
+              {levelLabel(l)}
+            </button>
+          ))}
+        </div>
+      </div>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={dict} disabled={busy} onChange={(e) => setDict(e.target.checked)} />
+        Include the full dictionary (about 8 MB)
+      </label>
+      <div className="flex flex-wrap gap-2">
+        <button className="btn btn-primary btn-sm" disabled={busy} onClick={async () => {
+          setMsg(null);
+          try {
+            const { failed } = await downloadForOffline({ levels: chosen, dict }, (done, total) => setProg({ done, total }));
+            setMsg(failed ? { ok: false, text: `Done, but ${failed} files failed. Try again when the connection is better.` } : { ok: true, text: "Everything selected is now available offline." });
+          } catch (e) {
+            setMsg({ ok: false, text: e instanceof Error ? e.message : String(e) });
+            setProg(null);
+          }
+          setTick((t) => t + 1);
+        }}>
+          <Download size={15} /> {busy ? "Downloading…" : "Download for offline"}
+        </button>
+        <button className="btn btn-sm" disabled={busy} onClick={async () => {
+          await clearOffline();
+          setProg(null);
+          setMsg({ ok: true, text: "Offline files removed. Your progress is not affected." });
+          setTick((t) => t + 1);
+        }}>Remove offline files</button>
+      </div>
+      {prog && <div className="space-y-1"><Progress value={(prog.done / Math.max(1, prog.total)) * 100} tone="good" /><p className="text-xs text-muted">{prog.done} / {prog.total} files</p></div>}
+      {msg && <p className={`text-sm ${msg.ok ? "text-good" : "text-accent"}`} role="status">{msg.text}</p>}
+      <p className="text-xs text-muted">Recorded sentence audio is saved as you listen. Without a saved clip, the app reads the sentence with your device&apos;s voice instead.</p>
     </div>
   );
 }
