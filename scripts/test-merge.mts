@@ -25,4 +25,5 @@ assert.deepEqual(Object.keys(k1.known).sort(), ["h1", "h2"], "known union");
 const mm = mergeStates(S({ mistakes: { h1: { kind: "word", count: 2, last: "2026-11-01T00:00:00Z" } } }), S({ mistakes: { h1: { kind: "word", count: 1, last: "2026-11-02T00:00:00Z" } } }));
 assert.equal(mm.mistakes.h1.count, 2); assert.equal(mm.mistakes.h1.last, "2026-11-02T00:00:00Z");
 assert.equal(mergeStates(S({ writing: { 好: 70 } }), S({ writing: { 好: 90 } })).writing["好"], 90);
+assert.equal(mergeStates(S({ readingsDone: { r1: 50 } }), S({ readingsDone: { r1: 75, r2: 100 } })).readingsDone.r1, 75);
 console.log("merge tests passed");

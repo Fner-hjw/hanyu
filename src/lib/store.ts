@@ -29,6 +29,7 @@ export type AppState = {
   writing: Record<string, number>; // char -> best accuracy %
   grammarDone: Record<string, boolean>;
   dialoguesDone: Record<string, number>; // best comprehension score %
+  readingsDone: Record<string, number>; // best comprehension score %
   tests: TestResult[];
   settings: {
     newPerDay: number;
@@ -52,6 +53,7 @@ export const DEFAULT_STATE: AppState = {
   writing: {},
   grammarDone: {},
   dialoguesDone: {},
+  readingsDone: {},
   tests: [],
   settings: { newPerDay: 10, direction: "zh-en", showPinyin: true, speed: 0.9, dailyGoal: 30, deck: "hsk-4", targetLevel: 5, examDate: "" },
 };
@@ -75,6 +77,7 @@ function normalize(parsed: unknown): AppState {
     writing: obj(p.writing) as AppState["writing"],
     grammarDone: obj(p.grammarDone) as AppState["grammarDone"],
     dialoguesDone: obj(p.dialoguesDone) as AppState["dialoguesDone"],
+    readingsDone: obj(p.readingsDone) as AppState["readingsDone"],
     tests: Array.isArray(p.tests) ? p.tests : [],
     settings: { ...DEFAULT_STATE.settings, ...(obj(p.settings) as Partial<AppState["settings"]>) },
   };
@@ -209,6 +212,10 @@ export function markGrammar(id: string) {
 export function saveDialogueScore(id: string, pct: number) {
   load();
   commit({ ...state, dialoguesDone: { ...state.dialoguesDone, [id]: Math.max(pct, state.dialoguesDone[id] ?? 0) } });
+}
+export function saveReadingScore(id: string, pct: number) {
+  load();
+  commit({ ...state, readingsDone: { ...state.readingsDone, [id]: Math.max(pct, state.readingsDone[id] ?? 0) } });
 }
 export function saveTest(r: TestResult) {
   load();

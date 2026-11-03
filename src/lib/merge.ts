@@ -33,6 +33,9 @@ export function mergeStates(a: AppState, b: AppState): AppState {
   const dialoguesDone: AppState["dialoguesDone"] = { ...a.dialoguesDone };
   for (const [k, v] of Object.entries(b.dialoguesDone)) dialoguesDone[k] = Math.max(dialoguesDone[k] ?? 0, v);
 
+  const readingsDone: AppState["readingsDone"] = { ...a.readingsDone };
+  for (const [k, v] of Object.entries(b.readingsDone ?? {})) readingsDone[k] = Math.max(readingsDone[k] ?? 0, v);
+
   const tests = [...a.tests];
   for (const r of b.tests) if (!tests.some((x) => x.date === r.date)) tests.push(r);
   tests.sort((x, y) => t(x.date) - t(y.date));
@@ -56,6 +59,7 @@ export function mergeStates(a: AppState, b: AppState): AppState {
     bank: { ...b.bank, ...a.bank },
     writing,
     dialoguesDone,
+    readingsDone,
     tests,
     settings: { ...b.settings, ...a.settings },
   };
@@ -74,6 +78,7 @@ export function fingerprint(s: AppState): string {
     bank: sortObj(s.bank),
     writing: sortObj(s.writing),
     dialoguesDone: sortObj(s.dialoguesDone),
+    readingsDone: sortObj(s.readingsDone ?? {}),
     tests: s.tests,
   });
 }

@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { buildSyllables, minimalPairs, toneless, initialOf, tonePairWords } from "../src/lib/syllables.ts";
+assert.equal(toneless("lǜ"), "lü"); assert.equal(toneless("zhōng"), "zhong"); assert.equal(initialOf("zhong"), "zh"); assert.equal(initialOf("ai"), "");
+const chars = JSON.parse(readFileSync("public/data/chars.json", "utf8"));
+const map = buildSyllables(chars);
+const pairs = minimalPairs(map);
+const words = JSON.parse(readFileSync("public/data/words-1.json", "utf8")).map((r: { i: string; z: string; p: string; e: string; t: string[]; l: number }) => ({ id: r.i, zh: r.z, py: r.p, en: r.e, pos: r.t, level: r.l, ex: [] }));
+const tp = tonePairWords(words);
+const by: Record<string, number> = {}; pairs.forEach((p) => (by[p.label] = (by[p.label] ?? 0) + 1));
+console.log(`${map.size} syllables; ${pairs.length} minimal pairs`, by, `; ${tp.length} HSK1 tone-pair words e.g.`, tp.slice(0, 4).map((w) => w.zh + w.pattern).join(" "));
+assert.ok(map.size > 300); assert.ok(pairs.length > 40); assert.ok(tp.length > 50);
+assert.ok(!map.get("xing")?.tones[2] || map.get("xing")!.tones[2]!.ch !== "行", "polyphone 行 excluded");
+console.log("syllable tests passed");

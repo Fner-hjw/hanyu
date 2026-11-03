@@ -108,7 +108,7 @@ ruby { ruby-position: over; }
   .chip {
     display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 999px;
     border: 1px solid var(--line); padding: 0.25rem 0.75rem; font-size: 0.8rem; color: var(--muted);
-    background: var(--card); cursor: pointer; transition: all 0.15s;
+    background: var(--card); cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
   }
   .chip:hover { background: var(--accent-soft); color: var(--fg); }
   .chip[data-active="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }

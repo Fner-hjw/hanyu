@@ -1,0 +1,22 @@
+import assert from "node:assert/strict";
+import { compareHanzi, comparePinyin } from "../src/lib/compare.ts";
+const marks = (r: ReturnType<typeof compareHanzi>) => r.chars.map((c) => (c.mark === "ok" ? "✓" : c.mark === "near" ? "~" : "✗")).join("");
+let r = compareHanzi("我在银行工作。", "我在银行工作");
+assert.equal(r.score, 100);
+r = compareHanzi("我在银行工作。", "我再银行工作"); // speech-recognition homophone
+assert.equal(marks(r), "✓~✓✓✓✓"); assert.ok(r.score > 90 && r.score < 100);
+r = compareHanzi("请把发票发给我。", "请把票发给我");
+assert.equal(marks(r), "✓✓✗✓✓✓✓");
+r = compareHanzi("今天天气很好", "");
+assert.equal(r.score, 0);
+r = compareHanzi("你好", "你好你好");
+assert.equal(r.score, 100); assert.equal(r.extra, 2);
+let p = comparePinyin("我在银行工作。", "wo zai yinhang gongzuo");
+assert.equal(p.score, 100);
+p = comparePinyin("我在银行工作。", "wo3 zai4 yin2hang2 gong1zuo4");
+assert.equal(p.score, 100);
+p = comparePinyin("我在银行工作。", "wo zai yinhan gongzuo");
+assert.equal(marks(p).split("").filter((m) => m === "~").length, 1, marks(p)); assert.ok(!marks(p).includes("✗")); 
+p = comparePinyin("请把发票发给我。", "qing ba fa gei wo");
+assert.ok(p.score < 80, "missing syllables lower the score: " + p.score);
+console.log("compare tests passed");
