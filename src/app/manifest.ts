@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Hànyǔ – Chinese for life & work",
-    short_name: "Hànyǔ",
+    name: "Hanyu Easy – Chinese for life & work",
+    short_name: "Hanyu Easy",
     description: "HSK 1–9 vocabulary, flashcards, listening, speaking, writing, grammar and tests.",
     start_url: "/",
     display: "standalone",

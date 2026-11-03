@@ -224,7 +224,7 @@ async function anthropicChat(cfg: AiConfig, o: ChatOptions): Promise<string> {
 function headers(cfg: AiConfig): Record<string, string> {
   const h: Record<string, string> = { "Content-Type": "application/json" };
   if (cfg.key) h.Authorization = `Bearer ${cfg.key}`;
-  if (cfg.provider === "openrouter") { h["HTTP-Referer"] = window.location.origin; h["X-Title"] = "Hanyu"; }
+  if (cfg.provider === "openrouter") { h["HTTP-Referer"] = window.location.origin; h["X-Title"] = "Hanyu Easy"; }
   return h;
 }
 

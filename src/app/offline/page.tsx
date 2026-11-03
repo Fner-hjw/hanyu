@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { WifiOff } from "lucide-react";
 
-export const metadata = { title: "Offline – Hànyǔ" };
+export const metadata = { title: "Offline – Hanyu Easy" };
 
 /** Served by the service worker for pages that weren't saved before going offline. */
 export default function Offline() {

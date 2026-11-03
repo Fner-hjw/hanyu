@@ -334,7 +334,7 @@ function Backup() {
           const f = e.target.files?.[0];
           e.target.value = "";
           if (!f) return;
-          try { importData(await f.text()); setMsg({ ok: true, text: "Backup restored." }); } catch { setMsg({ ok: false, text: "That file isn't a valid Hànyǔ backup." }); }
+          try { importData(await f.text()); setMsg({ ok: true, text: "Backup restored." }); } catch { setMsg({ ok: false, text: "That file isn't a valid Hanyu Easy backup." }); }
         }} />
         <button className="btn btn-sm text-accent" onClick={() => { if (arm) { resetData(); setArm(false); setMsg({ ok: true, text: "Progress on this device was deleted." }); } else setArm(true); }}
           onBlur={() => setArm(false)}>

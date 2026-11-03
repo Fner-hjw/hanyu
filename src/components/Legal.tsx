@@ -4,7 +4,7 @@ import Link from "next/link";
 /** Shared contact + date for the privacy policy and terms. Set NEXT_PUBLIC_CONTACT_EMAIL in Vercel. */
 export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "";
 export const LEGAL_UPDATED = "3 November 2026";
-export const APP_NAME = "Hànyǔ";
+export const APP_NAME = "Hanyu Easy";
 
 export function Contact() {
   return CONTACT_EMAIL

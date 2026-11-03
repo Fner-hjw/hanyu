@@ -1,4 +1,4 @@
-/* Hànyǔ service worker: makes the app work offline.
+/* Hanyu Easy service worker: makes the app work offline.
  *
  * Strategy per request type:
  *   pages (HTML)           network-first (4 s timeout), cached copy as fallback, then /offline

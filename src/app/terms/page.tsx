@@ -3,8 +3,8 @@ import Link from "next/link";
 import { APP_NAME, Contact, LegalPage, List, Section } from "@/components/Legal";
 
 export const metadata: Metadata = {
-  title: "Terms of Service – Hànyǔ",
-  description: "The terms for using the Hànyǔ Chinese learning app.",
+  title: "Terms of Service – Hanyu Easy",
+  description: "The terms for using the Hanyu Easy Chinese learning app.",
 };
 
 export default function Terms() {

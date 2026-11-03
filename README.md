@@ -1,4 +1,4 @@
-# 汉语 Hànyǔ – Chinese for life & work
+# 汉语 Hanyu Easy – Chinese for life & work
 
 A complete, free Chinese learning platform (Next.js 16 · TypeScript · Tailwind v4 · FSRS spaced repetition).
 Works offline-first in the browser; optional Supabase sync across devices; installable on your phone.

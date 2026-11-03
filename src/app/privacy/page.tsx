@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { APP_NAME, Contact, LegalPage, List, Section } from "@/components/Legal";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy – Hànyǔ",
-  description: "How Hànyǔ collects, uses, stores and deletes your information, including data received through Google Sign-In.",
+  title: "Privacy Policy – Hanyu Easy",
+  description: "How Hanyu Easy collects, uses, stores and deletes your information, including data received through Google Sign-In.",
 };
 
 export default function Privacy() {
