@@ -74,7 +74,8 @@ export default function Privacy() {
         <List>
           <li>Delete everything on a device at any time under <b>Account → Backup file → Reset this device</b>, or by clearing your browser&apos;s site data.</li>
           <li>Download a copy of your data at any time under <b>Account → Backup file → Download backup</b>.</li>
-          <li>Ask us to delete your account and all synced data by contacting us (see below). We delete it within 30 days, and any server backups held by our providers expire on their normal schedule.</li>
+          <li>Delete your account and all synced data yourself under <b>Account → Delete account</b>. Deletion is immediate and permanent.</li>
+          <li>Or ask us to delete it by contacting us (see below); we do so within 30 days. Server backups held by our providers expire on their normal schedule.</li>
         </List>
       </Section>
 

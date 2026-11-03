@@ -25,7 +25,7 @@ export default function Terms() {
           <li>An account is optional and is only needed to sync progress between devices.</li>
           <li>You can sign in with email, Google or GitHub. You must provide accurate information and keep your sign-in details secure; you are responsible for activity under your account.</li>
           <li>You must be at least 13 years old (or the minimum age required in your country) to create an account.</li>
-          <li>You may stop using the app and ask us to delete your account at any time.</li>
+          <li>You may stop using the app and delete your account at any time under Account → Delete account.</li>
         </List>
       </Section>
 

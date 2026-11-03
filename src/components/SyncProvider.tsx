@@ -27,6 +27,8 @@ type Ctx = {
   resendConfirmation: (email: string) => Promise<string | null>;
   updatePassword: (password: string) => Promise<string | null>;
   signOut: () => Promise<void>;
+  /** permanently deletes the signed-in account and its synced progress; returns an error message or null */
+  deleteAccount: () => Promise<string | null>;
 };
 
 const NOT_SET = "Sync is not configured";
@@ -36,6 +38,7 @@ const SyncCtx = createContext<Ctx>({
   provider: null, recovery: false, syncNow: async () => {},
   signIn: async () => NOT_SET, signInPassword: async () => NOT_SET, signUp: async () => ({ error: NOT_SET, confirm: false }),
   signInOAuth: async () => NOT_SET, resetPassword: async () => NOT_SET, resendConfirmation: async () => NOT_SET, updatePassword: async () => NOT_SET, signOut: async () => {},
+  deleteAccount: async () => NOT_SET,
 });
 const back = () => `${window.location.origin}/account`;
 export const useSync = () => useContext(SyncCtx);
@@ -166,11 +169,23 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
     return e ? e.message : null;
   }, [sb]);
   const signOut = useCallback(async () => { await sb?.auth.signOut(); }, [sb]);
+  const deleteAccount = useCallback(async () => {
+    if (!sb) return NOT_SET;
+    const { error: e } = await sb.rpc("delete_account");
+    if (e) {
+      // the SQL function from supabase/schema.sql hasn't been created in this project
+      if (e.code === "PGRST202" || /delete_account/.test(e.message)) return "Account deletion isn't set up on the server yet. Please contact us to delete your account.";
+      return e.message;
+    }
+    // the server session is gone with the user, so only clear the local one
+    await sb.auth.signOut({ scope: "local" });
+    return null;
+  }, [sb]);
 
   return (
     <SyncCtx.Provider value={{
       status, email, error, lastSynced, provider, recovery, syncNow: sync,
-      signIn, signInPassword, signUp, signInOAuth, resetPassword, resendConfirmation, updatePassword, signOut,
+      signIn, signInPassword, signUp, signInOAuth, resetPassword, resendConfirmation, updatePassword, signOut, deleteAccount,
     }}>
       {children}
     </SyncCtx.Provider>

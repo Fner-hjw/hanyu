@@ -218,7 +218,46 @@ function SignedIn() {
           {pwMsg && <p className={`mt-2 ${pwMsg.ok ? "text-good" : "text-accent"}`}>{pwMsg.text}</p>}
         </details>
       )}
+      <DeleteAccount />
     </div>
+  );
+}
+
+function DeleteAccount() {
+  const { email, deleteAccount } = useSync();
+  const [typed, setTyped] = useState("");
+  const [wipeLocal, setWipeLocal] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const ok = typed.trim().toUpperCase() === "DELETE";
+  return (
+    <details className="text-sm">
+      <summary className="cursor-pointer font-semibold text-accent">Delete account</summary>
+      <form className="mt-3 space-y-3 rounded-xl border border-accent/40 p-4" onSubmit={async (e) => {
+        e.preventDefault();
+        if (!ok) return;
+        setBusy(true);
+        setErr(null);
+        const error = await deleteAccount();
+        if (error) { setErr(error); setBusy(false); return; }
+        if (wipeLocal) resetData();
+      }}>
+        <p>
+          This permanently deletes the account <b>{email}</b> and all progress synced to it. It can&apos;t be undone.
+          If you signed in with Google or GitHub, you can also remove the app&apos;s access in that account&apos;s settings.
+        </p>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={wipeLocal} onChange={(e) => setWipeLocal(e.target.checked)} />
+          Also delete the progress saved on this device
+        </label>
+        <label className="block">
+          <span className="eyebrow">Type DELETE to confirm</span>
+          <input value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" className="input mt-1" />
+        </label>
+        <button className="btn btn-sm bg-accent text-accent-fg" disabled={!ok || busy}>{busy ? "Deleting…" : "Delete my account"}</button>
+        {err && <p className="text-accent" role="alert">{err}</p>}
+      </form>
+    </details>
   );
 }
 
