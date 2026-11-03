@@ -146,7 +146,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   }, [sb]);
   const signInOAuth = useCallback(async (p: OAuthProvider) => {
     if (!sb) return NOT_SET;
-    const { error: e } = await sb.auth.signInWithOAuth({ provider: p, options: { redirectTo: back() } });
+    const { error: e } = await sb.auth.signInWithOAuth({ provider: p, options: { redirectTo: back(), ...(p === "azure" && { scopes: "email" }) } });
     return e ? e.message : null;
   }, [sb]);
   const resetPassword = useCallback(async (addr: string) => {
