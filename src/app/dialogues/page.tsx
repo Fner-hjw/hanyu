@@ -4,7 +4,7 @@ import Link from "next/link";
 import { DIALOGUES } from "@/data/dialogues";
 import { useAppState } from "@/lib/store";
 
-const LABEL = { meetings: "Meeting", email: "Email", phone: "Phone", negotiation: "Negotiation", social: "Social" } as const;
+const LABEL = { meetings: "Meeting", email: "Email", phone: "Phone", negotiation: "Negotiation", social: "Social", daily: "Daily life" } as const;
 
 export default function Dialogues() {
   const s = useAppState();

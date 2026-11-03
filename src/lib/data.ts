@@ -30,16 +30,8 @@ export type Sentence = {
 /** [level, pinyin, meaning, strokes, compositionType, left, right] */
 export type CharInfo = [number, string, string, number, string, string, string];
 
-export const HSK_LEVELS = [1, 2, 3, 4, 5, 6, 7] as const;
-export const levelLabel = (l: number) => (l === 7 ? "HSK 7–9" : `HSK ${l}`);
-export const LEVEL_SIZES: Record<number, number> = { 1: 300, 2: 198, 3: 497, 4: 997, 5: 1591, 6: 1792, 7: 5583 };
-
-/** syllabus sequence number → level (ids look like "h936") */
-export function levelOfId(id: string): number {
-  if (!id.startsWith("h")) return 0;
-  const n = parseInt(id.slice(1), 10);
-  return n <= 300 ? 1 : n <= 500 ? 2 : n <= 1000 ? 3 : n <= 2000 ? 4 : n <= 3600 ? 5 : n <= 5400 ? 6 : 7;
-}
+export { HSK_LEVELS, levelLabel, LEVEL_SIZES, levelOfId } from "./levels";
+import { HSK_LEVELS, levelLabel, LEVEL_SIZES } from "./levels";
 
 /* ---------- fetch + cache ---------- */
 const cache = new Map<string, Promise<unknown>>();
@@ -99,6 +91,11 @@ export const DECKS: Deck[] = [
 ];
 
 export async function loadDeck(deckId: string): Promise<Word[]> {
+  const unit = /^unit-(\d)-(\d+)$/.exec(deckId);
+  if (unit) {
+    const words = await loadLevel(+unit[1]);
+    return words.slice((+unit[2] - 1) * 20, +unit[2] * 20);
+  }
   const d = DECKS.find((x) => x.id === deckId);
   if (!d) return [];
   if (d.kind === "hsk") return loadLevel(d.level!);

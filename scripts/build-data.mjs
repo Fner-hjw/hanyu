@@ -14,7 +14,7 @@ const POS = { 名: "n.", 动: "v.", 形: "adj.", 副: "adv.", 数: "num.", 量: 
 
 // ---------- CC-CEDICT index ----------
 const skip = /^(surname |variant of|old variant|erhua variant|see |abbr\. for|CL:|used in|Taiwan pr\.|also pr\.)/i;
-const clean = (d) => d.replace(/\s*CL:[^;]*/g, "").replace(/\[[^\]]*\]/g, "").trim();
+const clean = (d) => d.replace(/\s*CL:[^;]*/g, "").replace(/\[[^\]]*\]/g, "").replace(/\((bound form|coll\.)\)\s*/g, "").trim();
 const normPy = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/u:/g, "u").replace(/[^a-z]/g, "");
 const ced = new Map(); // zh -> [{py, defs}]
 for (const e of cedict) {
@@ -24,12 +24,31 @@ for (const e of cedict) {
   arr.push({ py: normPy(e.pinyin), raw: e.pinyin, defs });
   ced.set(e.simplified, arr);
 }
-const meaning = (zh, pinyin) => {
+const RARE = /\((old|archaic|dialect|slang|vulgar|literary|Taiwan|Cantonese|coll\.|loanword|obsolete)\b|\bbaby in position\b|euphemism/i;
+/** order definitions for learners: senses matching the part of speech first, rare/archaic senses last */
+function rankDefs(defs, pos = []) {
+  const fits = (p, d) =>
+    p === "mw." ? /classifier/i.test(d)
+    : p === "v." ? /^to /.test(d)
+    : p === "n." || p === "adj." ? !/^to /.test(d) && !/classifier/i.test(d)
+    : false;
+  // the syllabus lists the primary part of speech first
+  const want = (d) => (pos[0] && fits(pos[0], d) ? 0 : pos.slice(1).some((p) => fits(p, d)) ? 1 : 2);
+  return defs
+    .map((d, i) => ({ d, k: (RARE.test(d) ? 10 : 0) + want(d) + i / 100 }))
+    .sort((a, b) => a.k - b.k)
+    .map((x) => x.d);
+}
+const meaning = (zh, pinyin, pos) => {
   const list = ced.get(zh);
   if (!list) return "";
   const want = normPy(pinyin);
-  const hit = list.find((x) => x.py === want) ?? list[0];
-  return hit.defs.slice(0, 3).join("; ").slice(0, 110);
+  const hits = list.filter((x) => x.py === want);
+  const defs = (hits.length ? hits : [list[0]]).flatMap((x) => x.defs);
+  const ranked = rankDefs([...new Set(defs)], pos);
+  let out = ranked[0] ?? "";
+  for (const d of ranked.slice(1, 3)) if ((out + "; " + d).length <= 90) out += "; " + d;
+  return out.slice(0, 110);
 };
 
 // ---------- Sentences ----------
@@ -70,7 +89,7 @@ for (const w of out) {
   while (usedIds.has(id)) id += "b";
   usedIds.add(id);
   w.i = id;
-  w.e = meaning(w.z, w.p);
+  w.e = meaning(w.z, w.p, [...w.t]);
   if (!w.e) noMeaning++;
   w.t = [...w.t];
   const cands = (byToken.get(w.z) ?? [])

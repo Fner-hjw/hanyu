@@ -46,3 +46,33 @@ if (typeof window !== "undefined" && "speechSynthesis" in window) {
     cachedVoice = undefined;
   };
 }
+
+let current: HTMLAudioElement | null = null;
+
+/** Play a recorded clip; fall back to browser TTS of `fallbackText` if it can't load. */
+export function playUrl(url: string, fallbackText?: string, rate = 1): Promise<void> {
+  return new Promise((resolve) => {
+    stopAll();
+    const a = new Audio(url);
+    current = a;
+    a.playbackRate = rate;
+    let fellBack = false;
+    const fallback = () => {
+      if (fellBack) return;
+      fellBack = true;
+      if (fallbackText) speak(fallbackText, 0.9 * rate).then(resolve);
+      else resolve();
+    };
+    a.onended = () => resolve();
+    a.onerror = fallback;
+    a.play().catch(fallback);
+  });
+}
+
+export function stopAll() {
+  stopSpeaking();
+  if (current) {
+    current.pause();
+    current = null;
+  }
+}

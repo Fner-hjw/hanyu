@@ -3,7 +3,7 @@ export type Dialogue = {
   id: string;
   title: string;
   titleZh: string;
-  scenario: "meetings" | "email" | "phone" | "negotiation" | "social";
+  scenario: "meetings" | "email" | "phone" | "negotiation" | "social" | "daily";
   level: number;
   intro: string;
   lines: Line[];

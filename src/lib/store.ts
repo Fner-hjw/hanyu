@@ -188,6 +188,16 @@ export function reviewCard(id: string, rating: Grade) {
   });
 }
 
+/** put words into the review queue right away (bypasses the daily new-card limit) */
+export function addCards(ids: string[]) {
+  load();
+  const cards = { ...state.cards };
+  let added = 0;
+  for (const id of ids) if (!cards[id]) { cards[id] = fromCard(createEmptyCard()); added++; }
+  if (added) commit({ ...state, cards });
+  return added;
+}
+
 export function updateSettings(patch: Partial<AppState["settings"]>) {
   load();
   commit({ ...state, settings: { ...state.settings, ...patch } });

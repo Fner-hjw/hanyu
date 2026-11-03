@@ -9,7 +9,7 @@ export type NavItem = { href: string; label: string; desc: string; icon: LucideI
 /** `ready: false` items are hidden until the feature ships (see ROADMAP.md) */
 export const NAV: NavItem[] = [
   { href: "/", label: "Today", desc: "Your plan, streak and goals", icon: CalendarCheck, group: "Learn", ready: true },
-  { href: "/learn", label: "Path", desc: "HSK 1–9 lessons, unit by unit", icon: Route, group: "Learn", ready: false },
+  { href: "/learn", label: "Path", desc: "HSK 1–9 lessons, unit by unit", icon: Route, group: "Learn", ready: true },
   { href: "/flashcards", label: "Review", desc: "Spaced-repetition flashcards", icon: Layers, group: "Learn", ready: true },
   { href: "/vocab", label: "Vocabulary", desc: "Browse and search every word", icon: BookText, group: "Learn", ready: true },
   { href: "/listen", label: "Listen", desc: "Real audio, dictation, comprehension", icon: Headphones, group: "Practice", ready: false },
