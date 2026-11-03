@@ -45,7 +45,7 @@ function NotConnected() {
         <div className="flex items-center gap-2 font-semibold"><Bot size={20} /> Connect your AI to start</div>
         <p className="text-sm text-muted">
           The conversation partner uses your own AI account. The quickest free option is a Google Gemini key (free daily allowance, no card needed);
-          Claude, OpenAI, DeepSeek, OpenRouter and a local Ollama model work too. Your key stays on this device.
+          Claude, OpenAI, DeepSeek, OpenRouter, OpenCode Zen and a local Ollama model work too. Your key stays on this device.
         </p>
         <Link href="/account" className="btn btn-primary">Set up in Account → AI assistant</Link>
       </div>

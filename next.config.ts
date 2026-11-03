@@ -29,6 +29,7 @@ const csp = [
     "https://api.openai.com",
     "https://api.deepseek.com",
     "https://openrouter.ai",
+    "https://opencode.ai",
     "http://localhost:11434",
     "http://127.0.0.1:11434",
     "https://cdn.jsdelivr.net",

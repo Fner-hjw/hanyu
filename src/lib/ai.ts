@@ -5,12 +5,13 @@
  * localStorage on this device only: never in the synced progress, never sent to our server.
  * Requests go straight from the browser to the provider.
  *
- * Claude goes through the official Anthropic SDK; the other providers speak the OpenAI-style
+ * Claude goes through the official Anthropic SDK; the other providers (Gemini, OpenAI, DeepSeek,
+ * OpenRouter, OpenCode Zen, Ollama) speak the OpenAI-style
  * chat-completions protocol, so they share one small streaming client.
  */
 import { useSyncExternalStore } from "react";
 
-export type ProviderId = "gemini" | "anthropic" | "openai" | "deepseek" | "openrouter" | "ollama";
+export type ProviderId = "gemini" | "anthropic" | "openai" | "deepseek" | "openrouter" | "opencode" | "ollama";
 export type AiConfig = { provider: ProviderId; key: string; model: string };
 export type ChatMsg = { role: "user" | "assistant"; content: string };
 export type Effort = "low" | "medium" | "high";
@@ -86,6 +87,16 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
     base: "https://openrouter.ai/api/v1",
     defaultModel: "",
     prefer: [/^anthropic\/claude-opus-5\.5$/, /^anthropic\/claude-sonnet-5\.5$/, /^deepseek\/deepseek-chat/, /^openai\/gpt-5/],
+  },
+  opencode: {
+    name: "OpenCode Zen",
+    badge: "free models",
+    blurb: "One key for many models, with a rotating set of free ones. Paid models too.",
+    needsKey: true,
+    keyUrl: "https://opencode.ai/auth",
+    keyPlaceholder: "sk-…",
+    base: "https://opencode.ai/zen/v1",
+    defaultModel: "",
   },
   ollama: {
     name: "Ollama (on this computer)",
@@ -326,6 +337,11 @@ export async function listModels(cfg: Pick<AiConfig, "provider" | "key">): Promi
     const k = await fetch(`${base}/key`, { headers: headers({ ...cfg, model: "" }) }).catch(() => null);
     if (!k || !k.ok) throw friendly(k?.status ?? 401, "openrouter", "OpenRouter rejected the API key.");
   }
+  // OpenCode Zen's model list may be public too: check the key with a one-token request to a free model
+  if (cfg.provider === "opencode") {
+    const free = pickFreeModel("opencode", ids);
+    if (free) await oneTokenTest(cfg, free);
+  }
   return ids;
 }
 
@@ -341,28 +357,41 @@ function geminiChatModels(ids: string[]): string[] {
 
 /** If the model list isn't served on the compatibility endpoint, check the key with a one-token request. */
 async function geminiFallbackTest(key: string): Promise<string[]> {
-  const base = PROVIDERS.gemini.base!;
+  await oneTokenTest({ provider: "gemini", key }, PROVIDERS.gemini.defaultModel);
+  return GEMINI_FALLBACK;
+}
+
+/** Checks a key by asking for a single token (costs nothing on free models). */
+async function oneTokenTest(cfg: Pick<AiConfig, "provider" | "key">, model: string): Promise<void> {
+  const base = PROVIDERS[cfg.provider].base!;
   let r: Response;
   try {
     r = await fetch(`${base}/chat/completions`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-      body: JSON.stringify({ model: PROVIDERS.gemini.defaultModel, max_tokens: 1, messages: [{ role: "user", content: "hi" }] }),
+      headers: headers({ ...cfg, model }),
+      body: JSON.stringify({ model, max_tokens: 1, messages: [{ role: "user", content: "hi" }] }),
     });
   } catch {
-    throw unreachable("gemini");
+    throw unreachable(cfg.provider);
   }
-  if (!r.ok) throw friendly(r.status, "gemini", `Request failed (${r.status}).`, await errorText(r));
-  return GEMINI_FALLBACK;
+  // a free model that is busy (429) still proves the key was accepted
+  if (!r.ok && r.status !== 429) throw friendly(r.status, cfg.provider, `Request failed (${r.status}).`, await errorText(r));
 }
 
 /** version number in a Gemini model id, e.g. gemini-2.5-flash → 2.5 */
 const geminiVersion = (id: string) => parseFloat(/^gemini-(\d+(?:\.\d+)?)/.exec(id)?.[1] ?? "0");
 
-/** OpenRouter's free models end in ":free"; prefer ones that are good at Chinese. */
-export function pickFreeModel(ids: string[]): string | null {
-  const free = ids.filter((id) => id.endsWith(":free"));
-  for (const re of [/deepseek/i, /qwen/i, /gemini/i, /llama/i]) { const hit = free.find((id) => re.test(id)); if (hit) return hit; }
+/** Whether a model id is one of the provider's free models (OpenRouter: ":free"; OpenCode Zen: "-free" or big-pickle). */
+export function isFreeModel(provider: ProviderId, id: string): boolean {
+  if (provider === "openrouter") return id.endsWith(":free");
+  if (provider === "opencode") return /-free$/.test(id) || id === "big-pickle";
+  return false;
+}
+
+/** Picks a free model from a loaded list, preferring ones that are good at Chinese. */
+export function pickFreeModel(provider: ProviderId, ids: string[]): string | null {
+  const free = ids.filter((id) => isFreeModel(provider, id));
+  for (const re of [/deepseek/i, /qwen/i, /kimi/i, /glm/i, /gemini/i, /llama/i]) { const hit = free.find((id) => re.test(id)); if (hit) return hit; }
   return free[0] ?? null;
 }
 
@@ -375,6 +404,8 @@ export function pickModel(provider: ProviderId, ids: string[]): string {
     const flash = ids.filter((id) => /^gemini-\d+(\.\d+)?-flash$/.test(id)).sort((a, b) => geminiVersion(b) - geminiVersion(a));
     return flash[0] ?? (ids.includes(p.defaultModel) ? p.defaultModel : ids[0] ?? p.defaultModel);
   }
+  // OpenCode Zen is offered for its free models, so start on one
+  if (provider === "opencode") { const free = pickFreeModel(provider, ids); if (free) return free; }
   for (const re of p.prefer ?? []) { const hit = ids.find((id) => re.test(id)); if (hit) return hit; }
   return ids.includes(p.defaultModel) ? p.defaultModel : ids[0] ?? p.defaultModel;
 }

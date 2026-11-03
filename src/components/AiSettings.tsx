@@ -4,9 +4,9 @@ import { useState } from "react";
 import { Bot, Eye, EyeOff, ExternalLink } from "lucide-react";
 import { Badge } from "./ui";
 import { useHydrated } from "@/lib/store";
-import { getAiConfig, listModels, pickFreeModel, pickModel, PROVIDERS, setAiConfig, useAiConfig, type ProviderId } from "@/lib/ai";
+import { getAiConfig, isFreeModel, listModels, pickFreeModel, pickModel, PROVIDERS, setAiConfig, useAiConfig, type ProviderId } from "@/lib/ai";
 
-const ORDER: ProviderId[] = ["gemini", "openrouter", "anthropic", "deepseek", "openai", "ollama"];
+const ORDER: ProviderId[] = ["gemini", "opencode", "openrouter", "anthropic", "deepseek", "openai", "ollama"];
 
 /** Account → AI assistant: choose a provider, paste a key, test it and pick a model. */
 export function AiSettings() {
@@ -62,7 +62,7 @@ function Inner() {
       </div>
       <p className="text-sm text-muted">
         Connect your own AI account to use the conversation partner, writing feedback and speaking-test scoring. Google Gemini has a free
-        daily allowance; with paid providers a practice conversation usually costs a few cents or less.
+        daily allowance and OpenCode Zen has free models; with paid providers a practice conversation usually costs a few cents or less.
       </p>
 
       <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="AI provider">
@@ -101,13 +101,13 @@ function Inner() {
           <>
             <input className="input mt-1 font-mono text-sm" list={listId} value={model} onChange={(e) => setModel(e.target.value)}
               placeholder={models ? "Type to search the list" : "Test the connection to load the list"} spellCheck={false} />
-            <datalist id={listId}>{models && [...models].sort((a, b) => Number(b.endsWith(":free")) - Number(a.endsWith(":free"))).map((m) => <option key={m} value={m} />)}</datalist>
+            <datalist id={listId}>{models && [...models].sort((a, b) => Number(isFreeModel(provider, b)) - Number(isFreeModel(provider, a))).map((m) => <option key={m} value={m} />)}</datalist>
             {models && (
               <span className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted">
                 {models.length} models available
-                {provider === "openrouter" && (() => {
-                  const free = pickFreeModel(models);
-                  const n = models.filter((m) => m.endsWith(":free")).length;
+                {(provider === "openrouter" || provider === "opencode") && (() => {
+                  const free = pickFreeModel(provider, models);
+                  const n = models.filter((m) => isFreeModel(provider, m)).length;
                   return free ? (
                     <>
                       <span>· {n} free</span>
@@ -137,6 +137,7 @@ function Inner() {
       {msg && <p className={`text-sm ${msg.ok ? "text-good" : "text-accent"}`} role="status">{msg.text}</p>}
       <p className="text-xs text-muted">
         {provider === "gemini" && <>Create a free key at Google AI Studio with your Google account. The free tier has daily limits (Google may use free-tier conversations to improve its products). </>}
+        {provider === "opencode" && <>Sign in at OpenCode, create a Zen API key and pick a model ending in &ldquo;-free&rdquo; (or press &ldquo;Use a free model&rdquo;). Free models are offered for a limited time, have rate limits, and their providers may use the conversations to improve their models. </>}
         Your key is stored only in this browser. It isn&apos;t synced to your account or sent to our server: requests go straight from your device to {p.name}.
         Testing the connection doesn&apos;t use any credit.
       </p>
