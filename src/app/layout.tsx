@@ -9,8 +9,8 @@ export const metadata: Metadata = {
   description: "A complete Chinese learning platform: HSK 1–9 vocabulary, flashcards, listening, speaking, writing, grammar and tests.",
   icons: { icon: "/icon-192.png", apple: "/apple-icon.png" },
   appleWebApp: { capable: true, title: "Hanyu Easy", statusBarStyle: "default" },
-  // Google Search Console ownership check: set GOOGLE_SITE_VERIFICATION in Vercel to the code from the HTML-tag method
-  ...(process.env.GOOGLE_SITE_VERIFICATION && { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }),
+  // Google Search Console ownership check (HTML-tag method). GOOGLE_SITE_VERIFICATION in Vercel overrides it.
+  verification: { google: process.env.GOOGLE_SITE_VERIFICATION || "zt-5gLEJ52OYyRQ4BS6dOZHpdhroMdEH_DqywmhIWag" },
 };
 export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#c4352b" };
 
