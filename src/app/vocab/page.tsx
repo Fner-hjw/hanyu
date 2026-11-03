@@ -57,7 +57,7 @@ function Browser() {
 
   return (
     <div>
-      <PageHeader title="Vocabulary" subtitle="Every word of the HSK 3.1 syllabus (levels 1–9) plus a hand-written business & finance pack. Tap a word for examples, characters and notes." />
+      <PageHeader title="Vocabulary" subtitle="Every word of the revised HSK syllabus (November 2025, levels 1–9) plus a hand-written business & finance pack. Tap a word for examples, characters and notes." />
 
       <div className="card mb-4 space-y-3 p-4">
         <div className="relative">

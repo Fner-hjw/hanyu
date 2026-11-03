@@ -35,7 +35,7 @@ Push to GitHub → import the repo on vercel.com → Deploy. For cross-device sy
 ## Data & licences
 | Data | Source | Licence |
 |---|---|---|
-| HSK 3.1 word list | `hsk3.1-syllabus` | MIT |
+| HSK word list (revised syllabus, Nov 2025: cumulative 300 / 500 / 1,000 / 2,000 / 3,600 / 5,400 / 11,000 words) | `hsk3.1-syllabus` | MIT |
 | Meanings, dictionary | CC-CEDICT (MDBG) | CC BY-SA 4.0 |
 | Graded sentences & audio | no7z/hsk-sentences-audio | CC BY-SA 4.0 |
 | Character decomposition | Wikimedia Commons CCD | — |

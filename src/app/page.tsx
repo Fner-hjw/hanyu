@@ -90,9 +90,13 @@ function Today() {
             <Link href="/vocab" className="flex items-center gap-1 text-sm text-accent">Browse <ArrowRight size={14} /></Link>
           </div>
           <div className="space-y-3">
-            {perLevel.map(({ l, n, total }) => (
+            <p className="-mt-1 text-xs text-muted">Words started out of the new words at each level. Running totals follow the revised HSK syllabus (November 2025).</p>
+            {perLevel.map(({ l, n, total }, i) => (
               <div key={l}>
-                <div className="mb-1 flex justify-between text-sm"><span className="font-medium">{levelLabel(l)}</span><span className="text-muted">{n} / {total.toLocaleString()}</span></div>
+                <div className="mb-1 flex justify-between gap-2 text-sm">
+                  <span className="font-medium">{levelLabel(l)}</span>
+                  <span className="text-muted">{n} / {total.toLocaleString()} new · {perLevel.slice(0, i + 1).reduce((a, x) => a + x.total, 0).toLocaleString()} in total</span>
+                </div>
                 <Progress value={(n / total) * 100} tone={l <= 2 ? "good" : l <= 4 ? "sky" : "accent"} />
               </div>
             ))}
