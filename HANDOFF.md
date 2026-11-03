@@ -7,6 +7,7 @@ Read this first in a new session. It records where the project stands, how it's 
 - Phases 0–6 in `ROADMAP.md` are done. Phase 7 is next (see below).
 - Phase 7a (done): account and navigation rework. Supabase is set up by the owner. Sign-in supports email + password (no email needed when "Confirm email" is off), GitHub/Google OAuth (buttons appear only when enabled; read from `/auth/v1/settings` via `getAuthSettings()`), email link, and password reset. Backup/restore moved from Today to `/account`. The sidebar has 4 groups (Study, Practice [collapsible], Tools, You) with the account chip at the top. Email verification works once the owner connects SMTP (Gmail app password suggested), with a resend-confirmation button.
 - Phase 7b (done): offline mode. `public/sw.js` (hand-written service worker; bump `VERSION` when caching rules change) caches pages network-first with an `/offline` fallback, `/_next/static` cache-first, `/data` + `/dict` stale-while-revalidate, sentence audio (answers Range requests from cache), stroke data and fonts. `src/lib/offline.ts` registers it (production only), quietly saves the word/sentence data once per device, and powers Account → Offline (download pages + chosen HSK units + dictionary, storage stats, remove). `/offline-manifest.json` is a static route listing what can be downloaded. Sync skips while offline and resumes on `online`. Next's experimental `useOffline` is deliberately not enabled: it would hold failed navigations pending instead of letting the service worker serve them.
+- Phase 7c (done): AI with the learner's own key. `src/lib/ai.ts` stores `{provider, key, model}` in localStorage `hanyu:ai` (device only, never synced). Claude goes through `@anthropic-ai/sdk` in the browser (`dangerouslyAllowBrowser`, beta `server-side-fallback-2026-07-01` + `fallbacks: "default"` except on Haiku, `output_config.effort` low for chat / medium for feedback); OpenAI, DeepSeek, OpenRouter and Ollama share an OpenAI-style streaming client. `listModels()` doubles as a free key test. UI: `components/AiSettings.tsx` (Account → AI assistant), `/talk` (14 role-play scenarios in `src/data/scenarios.ts` + free conversation; replies are parsed as Chinese / `EN:` / `FIX:`; end-of-chat JSON feedback with "add to my words"), `/compose` (word / pattern / translate tasks; free rule checks and `compareHanzi` scoring, AI JSON verdict when connected). Gotcha: an effect must not return `el.scrollIntoView(...)` – Chromium now returns a Promise from it, which React treats as the cleanup function and crashes. Note: the current SDK sends the key as `Authorization: Bearer`, not `x-api-key`.
 - Owner: an English speaker around HSK 4 who works in finance. Goals: speak more fluently and build workplace vocabulary. Prefers simplified characters and pinyin, free hosting (GitHub + Vercel + Supabase), and the best free audio.
 - Working agreement from the owner: Opus owns architecture, core features and review. Lower-level tasks (content writing, pattern-following pages, QA sweeps) go to Sonnet or Haiku subagents, and Opus reviews everything before committing. Work in phases; each phase ends with a green build, lint, browser smoke test and a commit + push.
 
@@ -81,6 +82,7 @@ Browser-test tips from this project:
 
 ## Known limitations
 - Speech scoring was only tested with a simulated recognizer. Real scoring needs Chrome, Edge or Safari.
+- AI features were browser-tested against mocked providers only (Anthropic via the SDK, OpenRouter via the OpenAI-style client). The first real conversation should be watched for format drift in replies (the `EN:` / `FIX:` lines in `/talk`).
 - Recorded audio comes from GitHub raw and stroke data from jsDelivr, with unpkg as the fallback. Offline, only clips and characters already used are available; missing audio falls back to the device's text-to-speech.
 - Content written with AI help was reviewed by Opus but not by a native speaker.
 - Without an SMTP server, Supabase's built-in mailer only reaches project team members and is rate-limited, so email links and password resets are for the owner only. Password sign-up works for anyone if "Confirm email" is off.
@@ -88,8 +90,8 @@ Browser-test tips from this project:
 
 ## Phase 7 (next): suggested order
 1. ~~Offline mode~~ (done, 7b).
-2. AI connection with the user's own key (BYOK: Anthropic, OpenAI, DeepSeek, OpenRouter; key stored only in the browser), then the conversation partner and AI writing feedback on top of it. Show the owner the connection screen and provider list before building the partner.
+2. ~~AI connection, conversation partner, writing practice~~ (done, 7c).
 3. More content (via subagents + review): more readings and dialogues at HSK 5–6 for finance, plus extra example sentences for words without any.
 4. A spoken (HSKK-style) test using `lib/compare` and `lib/speech`.
-5. Writing practice: sentence composition with feedback.
+5. ~~Writing practice~~ (done in 7c as `/compose`).
 6. Independent content audit: a fresh reviewer agent with no drafting context, a fixed checklist and CC-CEDICT checks; findings fixed and re-reviewed (owner chose this over a native-speaker checklist).

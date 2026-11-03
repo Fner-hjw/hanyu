@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Cloud, Download, HardDrive, KeyRound, Mail, WifiOff } from "lucide-react";
 import { useSync } from "@/components/SyncProvider";
+import { AiSettings } from "@/components/AiSettings";
 import { PageHeader, Badge, Progress } from "@/components/ui";
 import { useAsync, levelLabel } from "@/lib/data";
 import { clearOffline, downloadForOffline, offlineStatus, offlineSupported } from "@/lib/offline";
@@ -17,6 +18,7 @@ export default function Account() {
       <PageHeader title="Account & sync" subtitle="Your progress is always saved on this device. Sign in to back it up and use it on your other devices." />
       <Storage />
       {!syncConfigured ? <Setup /> : recovery ? <NewPassword /> : email ? <SignedIn /> : <SignInCard settings={settings.data} loading={settings.loading} />}
+      <AiSettings />
       <Offline />
       <Backup />
       {syncConfigured && <OwnerNotes settings={settings.data} />}

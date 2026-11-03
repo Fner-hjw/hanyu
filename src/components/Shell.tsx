@@ -28,7 +28,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   /** Practice is collapsed by default; null = follow the current page */
   const [practiceOpen, setPracticeOpen] = useState<boolean | null>(null);
   const online = useOnline();
-  useEffect(() => registerServiceWorker(), []);
+  useEffect(() => { registerServiceWorker(); }, []);
   const items = visibleNav();
   const days = hydrated ? streak(s) : 0;
   const dot = { synced: "bg-good", syncing: "bg-gold", error: "bg-accent", idle: "bg-line", "signed-out": "bg-line", offline: "bg-line", off: "" }[status];

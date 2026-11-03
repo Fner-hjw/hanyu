@@ -54,3 +54,27 @@ export type Radical = {
   strokes: number;
   examples: string; // 4–6 common characters containing it, no separators, e.g. "河湖海洗"
 };
+
+/** Role-play scenario for the AI conversation partner (/talk). */
+export type Scenario = {
+  id: string; // "s-<slug>", unique
+  title: string; // short English title
+  titleZh: string;
+  category: "meetings" | "clients" | "negotiation" | "reporting" | "phone" | "social" | "daily";
+  level: 3 | 4 | 5 | 6; // HSK level the learner should be at
+  /** who the AI plays, in English, with a Chinese name, e.g. "Manager 李总, head of finance at a Shanghai bank" */
+  aiRole: string;
+  /** who the learner plays, in English */
+  userRole: string;
+  /** 1–2 English sentences setting the scene for the learner */
+  brief: string;
+  /** what the learner should try to achieve, 2–3 short English bullet points */
+  goals: string[];
+  /** first line the AI says, in Chinese, in character */
+  opening: string;
+  openingEn: string;
+  /** 5–8 useful phrases for this situation */
+  phrases: { zh: string; en: string }[];
+  /** extra private instructions for the AI's character (personality, hidden constraints), in English */
+  notes: string;
+};
