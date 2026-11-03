@@ -13,7 +13,7 @@ a guided path and progress tracking.
 | 4 | Handwriting trainer + radicals, 61 grammar points, 21 dialogues with role-play | done |
 | 5 | Adaptive placement + generated mock exams, numbers & money trainer, progress & study plan | done |
 | 6 | Mistakes notebook, personal word bank, games, installable app (PWA) | done |
-| 7 (in progress) | Account rework + email/password/OAuth sign-in (done); offline mode (done); AI connection with your own key + conversation partner (/talk) + sentence composition (/compose) (done); more finance readings/dialogues + HSK 4–5 example sentences (done); HSKK speaking test (done); independent content audit | in progress |
+| 7 (in progress) | Account rework + email/password/OAuth sign-in (done); offline mode (done); AI connection with your own key + conversation partner (/talk) + sentence composition (/compose) (done); more finance readings/dialogues + HSK 4–5 example sentences (done); HSKK speaking test (done); independent content audit (done); examples for every HSK 1–6 word (done) | done |
 
 Each phase ends with a green build, lint, browser smoke test and a commit.
 

@@ -85,14 +85,15 @@ Browser-test tips from this project:
 - Speech scoring was only tested with a simulated recognizer. Real scoring needs Chrome, Edge or Safari.
 - AI features were browser-tested against mocked providers only (Anthropic via the SDK, OpenRouter via the OpenAI-style client). The first real conversation should be watched for format drift in replies (the `EN:` / `FIX:` lines in `/talk`).
 - Recorded audio comes from GitHub raw and stroke data from jsDelivr, with unpkg as the fallback. Offline, only clips and characters already used are available; missing audio falls back to the device's text-to-speech.
-- Content written with AI help was reviewed by Opus but not by a native speaker.
+- Content written with AI help was reviewed by Opus and independently audited (7e), but not by a native speaker.
+- Vocabulary follows the revised HSK syllabus (Nov 2025): cumulative 300/500/1,000/2,000/3,600/5,400/11,000 words, so per-level counts are small at HSK 1–2 by design (Today shows new + running totals).
 - Without an SMTP server, Supabase's built-in mailer only reaches project team members and is rate-limited, so email links and password resets are for the owner only. Password sign-up works for anyone if "Confirm email" is off.
 - The empty clone at `/home/user/hanyu-github` in the old container can be ignored.
 
 ## Phase 7 (next): suggested order
 1. ~~Offline mode~~ (done, 7b).
 2. ~~AI connection, conversation partner, writing practice~~ (done, 7c).
-3. ~~More content~~ (done, 7d). Still open: example sentences for 719 HSK 6 words without any.
+3. ~~More content~~ (done, 7d). Every HSK 1–6 word now has at least one example sentence (1,019 hand-written ones in `src/data/examples-extra.json`; HSK 7–9 still has ~5,200 words without).
 4. ~~Spoken test~~ (done, 7d).
 5. ~~Writing practice~~ (done in 7c as `/compose`).
-6. Independent content audit: a fresh reviewer agent with no drafting context, a fixed checklist and CC-CEDICT checks; findings fixed and re-reviewed (owner chose this over a native-speaker checklist).
+6. ~~Independent content audit~~ (done, 7e): six fresh Opus auditors with a fixed checklist (brief kept in the commit message); 122 findings reviewed and applied. Re-run the same way after large content additions.
