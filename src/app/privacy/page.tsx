@@ -61,15 +61,23 @@ export default function Privacy() {
         <p>These providers process data on our behalf and may store it in the United States, the European Union or other countries. Data is encrypted in transit (HTTPS).</p>
       </Section>
 
-      <Section title="5. Third-party services you choose to use">
+      <Section title="5. Third-party services">
         <List>
           <li><b>AI features (bring your own key).</b> The conversation partner, writing feedback and speaking-test scoring only work if you add your own API key for an AI provider (for example Google Gemini, Anthropic, OpenAI, DeepSeek, OpenRouter or a local Ollama). Your key is stored only in your browser on that device; it is never synced to your account or sent to us. When you use these features, the text you write or say is sent directly from your browser to the provider you chose and is handled under that provider&apos;s own privacy policy.</li>
           <li><b>Speech recognition.</b> Speaking exercises use your browser&apos;s built-in speech recognition. Depending on your browser, audio may be processed by the browser vendor (for example Google in Chrome). Recordings you make to compare your voice stay on your device.</li>
-          <li><b>Fonts.</b> Pages load fonts from Google Fonts, which receives your IP address when the fonts are downloaded.</li>
+          <li><b>Learning content delivery.</b> Character stroke-order data is loaded from the public jsDelivr or unpkg CDNs, and recorded sentence audio from GitHub. These services receive your IP address when a file is downloaded, as with any web request, but no information about you or your account. Fonts are served from our own domain.</li>
         </List>
       </Section>
 
-      <Section title="6. Retention and deletion">
+      <Section title="6. Cookies and local storage">
+        <p>We do not use cookies for analytics, advertising or tracking, and no third-party tracking scripts run in the app. The app uses
+          your browser&apos;s local storage only for things that are strictly necessary for the features you use: your learning progress
+          and settings, your sign-in session if you have an account, any AI key you add, and pages and audio saved for offline use.
+          Because nothing is used for tracking, no cookie consent banner is shown. You can remove all of it at any time by clearing
+          this site&apos;s data in your browser.</p>
+      </Section>
+
+      <Section title="7. Retention and deletion">
         <p>We keep your account and synced progress while your account exists. You can:</p>
         <List>
           <li>Delete everything on a device at any time under <b>Account → Backup file → Reset this device</b>, or by clearing your browser&apos;s site data.</li>
@@ -79,22 +87,22 @@ export default function Privacy() {
         </List>
       </Section>
 
-      <Section title="7. Your rights">
+      <Section title="8. Your rights">
         <p>Depending on where you live (for example under the GDPR or CCPA), you may have the right to access, correct, export or delete
           your personal data, to object to or restrict its processing, and to complain to your data protection authority. Our legal basis
           for processing account data is performing the service you asked for (contract) and, for security logs, our legitimate interest
           in keeping the service safe. Contact us to exercise any of these rights.</p>
       </Section>
 
-      <Section title="8. Children">
+      <Section title="9. Children">
         <p>The app is not directed at children under 13 and we do not knowingly collect personal data from them. If you believe a child has created an account, contact us and we will delete it.</p>
       </Section>
 
-      <Section title="9. Changes">
+      <Section title="10. Changes">
         <p>If we change this policy we will update the date at the top of this page. Significant changes will be noted in the app.</p>
       </Section>
 
-      <Section title="10. Contact">
+      <Section title="11. Contact">
         <p>Questions or deletion requests: <Contact /></p>
       </Section>
     </LegalPage>

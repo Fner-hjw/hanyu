@@ -65,8 +65,8 @@
   --color-gold-soft: var(--gold-soft);
   --color-sky: var(--sky);
   --color-sky-soft: var(--sky-soft);
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
-  --font-serif: "Noto Serif SC", "Songti SC", "STSong", serif;
+  --font-sans: var(--f-inter), "Inter", system-ui, -apple-system, "Segoe UI", Roboto, var(--f-noto-sans), "Noto Sans SC", sans-serif;
+  --font-serif: var(--f-noto-serif), "Noto Serif SC", "Songti SC", "STSong", serif;
   --shadow-card: var(--shadow);
 }
 
@@ -80,8 +80,8 @@ body {
 }
 
 /* Chinese text */
-.han { font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", sans-serif; }
-.hanzi { font-family: "Noto Serif SC", "Songti SC", "STSong", "Source Han Serif SC", serif; font-weight: 500; }
+.han { font-family: var(--f-noto-sans), "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", sans-serif; }
+.hanzi { font-family: var(--f-noto-serif), "Noto Serif SC", "Songti SC", "STSong", "Source Han Serif SC", serif; font-weight: 500; }
 ruby { ruby-position: over; }
 
 /* ---------- components ---------- */

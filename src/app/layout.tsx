@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Inter, Noto_Sans_SC, Noto_Serif_SC } from "next/font/google";
 import "./globals.css";
 import { Shell } from "@/components/Shell";
 import { SyncProvider } from "@/components/SyncProvider";
@@ -11,20 +12,16 @@ export const metadata: Metadata = {
 };
 export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#c4352b" };
 
+// Self-hosted by next/font: font files are downloaded at build time and served from our own domain,
+// so visitors' browsers never contact Google. CJK fonts are split into unicode-range slices,
+// so only the glyphs a page actually uses are downloaded.
+const inter = Inter({ subsets: ["latin"], variable: "--f-inter", display: "swap" });
+const notoSans = Noto_Sans_SC({ subsets: ["latin"], variable: "--f-noto-sans", display: "swap", preload: false });
+const notoSerif = Noto_Serif_SC({ weight: ["500", "700"], subsets: ["latin"], variable: "--f-noto-serif", display: "swap", preload: false });
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        {/* App Router root layout applies to every page, so this lint rule (written for pages/) doesn't apply.
-            CJK fonts load via Google's unicode-range slices: only glyphs actually used are downloaded. */}
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;700&display=swap"
-        />
-      </head>
+    <html lang="en" className={`${inter.variable} ${notoSans.variable} ${notoSerif.variable}`}>
       <body className="min-h-screen">
         <SyncProvider>
           <Shell>{children}</Shell>
