@@ -10,13 +10,15 @@
  */
 import { useSyncExternalStore } from "react";
 
-export type ProviderId = "anthropic" | "openai" | "deepseek" | "openrouter" | "ollama";
+export type ProviderId = "gemini" | "anthropic" | "openai" | "deepseek" | "openrouter" | "ollama";
 export type AiConfig = { provider: ProviderId; key: string; model: string };
 export type ChatMsg = { role: "user" | "assistant"; content: string };
 export type Effort = "low" | "medium" | "high";
 
 type Provider = {
   name: string;
+  /** short badge, e.g. "free tier" */
+  badge?: string;
   blurb: string;
   needsKey: boolean;
   keyUrl?: string;
@@ -31,6 +33,16 @@ type Provider = {
 };
 
 export const PROVIDERS: Record<ProviderId, Provider> = {
+  gemini: {
+    name: "Google Gemini",
+    badge: "free tier",
+    blurb: "Free daily allowance with a Google account, no card needed. Good at Chinese.",
+    needsKey: true,
+    keyUrl: "https://aistudio.google.com/apikey",
+    keyPlaceholder: "AIza…",
+    base: "https://generativelanguage.googleapis.com/v1beta/openai",
+    defaultModel: "gemini-2.5-flash",
+  },
   anthropic: {
     name: "Claude (Anthropic)",
     blurb: "Excellent corrections and explanations.",
@@ -66,6 +78,7 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
   },
   openrouter: {
     name: "OpenRouter",
+    badge: "some free models",
     blurb: "One key for Claude, GPT, DeepSeek and many others, including some free models.",
     needsKey: true,
     keyUrl: "https://openrouter.ai/settings/keys",
@@ -76,6 +89,7 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
   },
   ollama: {
     name: "Ollama (on this computer)",
+    badge: "free",
     blurb: "Free, runs locally. Start Ollama with OLLAMA_ORIGINS set to this site's address.",
     needsKey: false,
     base: "http://localhost:11434/v1",
@@ -132,9 +146,21 @@ export function useAiConfig(): AiConfig | null {
 /* ---------- errors ---------- */
 export class AiError extends Error {}
 
-function friendly(status: number | undefined, provider: ProviderId, fallback: string): AiError {
+/** the provider's error message, if the body has one (OpenAI-style object, or Gemini's array of them) */
+async function errorText(r: Response): Promise<string> {
+  try {
+    const j = await r.json();
+    const e = Array.isArray(j) ? j[0]?.error : j?.error;
+    return typeof e === "string" ? e : e?.message ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function friendly(status: number | undefined, provider: ProviderId, fallback: string, detail = ""): AiError {
   const name = PROVIDERS[provider].name;
-  if (status === 401 || status === 403) return new AiError(`${name} rejected the API key. Check it under Account → AI assistant.`);
+  // some providers (Gemini) answer a bad key with 400 rather than 401
+  if (status === 401 || status === 403 || (status === 400 && /api[ _-]?key/i.test(detail))) return new AiError(`${name} rejected the API key. Check it under Account → AI assistant.`);
   if (status === 402) return new AiError(`Your ${name} account is out of credit.`);
   if (status === 404) return new AiError(`${name} doesn't know that model. Pick another under Account → AI assistant.`);
   if (status === 429) return new AiError(`${name} is rate-limiting requests or your credit ran out. Wait a moment and try again.`);
@@ -217,9 +243,8 @@ async function compatChat(cfg: AiConfig, o: ChatOptions): Promise<string> {
     throw unreachable(cfg.provider);
   }
   if (!r.ok || !r.body) {
-    let detail = "";
-    try { const j = await r.json(); detail = j?.error?.message ?? ""; } catch { /* not JSON */ }
-    throw friendly(r.status, cfg.provider, detail || `Request failed (${r.status}).`);
+    const detail = await errorText(r);
+    throw friendly(r.status, cfg.provider, detail || `Request failed (${r.status}).`, detail);
   }
   const reader = r.body.getReader();
   const dec = new TextDecoder();
@@ -291,9 +316,11 @@ export async function listModels(cfg: Pick<AiConfig, "provider" | "key">): Promi
   } catch {
     throw unreachable(cfg.provider);
   }
-  if (!r.ok) throw friendly(r.status, cfg.provider, `Request failed (${r.status}).`);
+  if (cfg.provider === "gemini" && r.status === 404) return geminiFallbackTest(cfg.key);
+  if (!r.ok) throw friendly(r.status, cfg.provider, `Request failed (${r.status}).`, await errorText(r));
   const j = (await r.json()) as { data?: { id: string }[] };
-  const ids = (j.data ?? []).map((m) => m.id).sort();
+  let ids = (j.data ?? []).map((m) => m.id).sort();
+  if (cfg.provider === "gemini") ids = geminiChatModels(ids);
   // OpenRouter's model list is public, so check the key separately
   if (cfg.provider === "openrouter") {
     const k = await fetch(`${base}/key`, { headers: headers({ ...cfg, model: "" }) }).catch(() => null);
@@ -302,10 +329,52 @@ export async function listModels(cfg: Pick<AiConfig, "provider" | "key">): Promi
   return ids;
 }
 
+/* ---------- Gemini helpers ---------- */
+const GEMINI_FALLBACK = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro"];
+
+/** Gemini lists ids as "models/…" and includes embedding, image and audio models: keep text chat models only. */
+function geminiChatModels(ids: string[]): string[] {
+  return ids
+    .map((id) => id.replace(/^models\//, ""))
+    .filter((id) => /^gemini-/.test(id) && !/embed|image|tts|audio|live|vision|aqa|thinking-exp/.test(id));
+}
+
+/** If the model list isn't served on the compatibility endpoint, check the key with a one-token request. */
+async function geminiFallbackTest(key: string): Promise<string[]> {
+  const base = PROVIDERS.gemini.base!;
+  let r: Response;
+  try {
+    r = await fetch(`${base}/chat/completions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      body: JSON.stringify({ model: PROVIDERS.gemini.defaultModel, max_tokens: 1, messages: [{ role: "user", content: "hi" }] }),
+    });
+  } catch {
+    throw unreachable("gemini");
+  }
+  if (!r.ok) throw friendly(r.status, "gemini", `Request failed (${r.status}).`, await errorText(r));
+  return GEMINI_FALLBACK;
+}
+
+/** version number in a Gemini model id, e.g. gemini-2.5-flash → 2.5 */
+const geminiVersion = (id: string) => parseFloat(/^gemini-(\d+(?:\.\d+)?)/.exec(id)?.[1] ?? "0");
+
+/** OpenRouter's free models end in ":free"; prefer ones that are good at Chinese. */
+export function pickFreeModel(ids: string[]): string | null {
+  const free = ids.filter((id) => id.endsWith(":free"));
+  for (const re of [/deepseek/i, /qwen/i, /gemini/i, /llama/i]) { const hit = free.find((id) => re.test(id)); if (hit) return hit; }
+  return free[0] ?? null;
+}
+
 /** Picks a sensible default model from a loaded list. */
 export function pickModel(provider: ProviderId, ids: string[]): string {
   const p = PROVIDERS[provider];
   if (p.models) return p.defaultModel;
+  if (provider === "gemini") {
+    // newest stable Flash model: fast, and inside the free tier
+    const flash = ids.filter((id) => /^gemini-\d+(\.\d+)?-flash$/.test(id)).sort((a, b) => geminiVersion(b) - geminiVersion(a));
+    return flash[0] ?? (ids.includes(p.defaultModel) ? p.defaultModel : ids[0] ?? p.defaultModel);
+  }
   for (const re of p.prefer ?? []) { const hit = ids.find((id) => re.test(id)); if (hit) return hit; }
   return ids.includes(p.defaultModel) ? p.defaultModel : ids[0] ?? p.defaultModel;
 }

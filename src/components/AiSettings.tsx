@@ -4,9 +4,9 @@ import { useState } from "react";
 import { Bot, Eye, EyeOff, ExternalLink } from "lucide-react";
 import { Badge } from "./ui";
 import { useHydrated } from "@/lib/store";
-import { getAiConfig, listModels, pickModel, PROVIDERS, setAiConfig, useAiConfig, type ProviderId } from "@/lib/ai";
+import { getAiConfig, listModels, pickFreeModel, pickModel, PROVIDERS, setAiConfig, useAiConfig, type ProviderId } from "@/lib/ai";
 
-const ORDER: ProviderId[] = ["openrouter", "anthropic", "deepseek", "openai", "ollama"];
+const ORDER: ProviderId[] = ["gemini", "openrouter", "anthropic", "deepseek", "openai", "ollama"];
 
 /** Account → AI assistant: choose a provider, paste a key, test it and pick a model. */
 export function AiSettings() {
@@ -17,7 +17,7 @@ export function AiSettings() {
 function Inner() {
   const saved = useAiConfig();
   const [draft] = useState(() => getAiConfig());
-  const [provider, setProvider] = useState<ProviderId>(draft?.provider ?? "openrouter");
+  const [provider, setProvider] = useState<ProviderId>(draft?.provider ?? "gemini");
   const [key, setKey] = useState(draft?.key ?? "");
   const [model, setModel] = useState(draft?.model ?? "");
   const [show, setShow] = useState(false);
@@ -61,15 +61,15 @@ function Inner() {
         <Badge tone={saved ? "good" : "muted"}>{saved ? `on · ${PROVIDERS[saved.provider].name}` : "not connected"}</Badge>
       </div>
       <p className="text-sm text-muted">
-        Connect your own AI account to use the conversation partner and writing feedback. You pay the provider directly for what you use;
-        a practice conversation usually costs a few cents or less.
+        Connect your own AI account to use the conversation partner, writing feedback and speaking-test scoring. Google Gemini has a free
+        daily allowance; with paid providers a practice conversation usually costs a few cents or less.
       </p>
 
       <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="AI provider">
         {ORDER.map((id) => (
           <button key={id} type="button" role="radio" aria-checked={provider === id} onClick={() => choose(id)}
             className={`rounded-xl border p-3 text-left text-sm transition-colors ${provider === id ? "border-accent bg-accent-soft" : "border-line bg-card hover:bg-accent-soft"}`}>
-            <span className="block font-semibold">{PROVIDERS[id].name}{id === "openrouter" && <span className="ml-1.5 text-xs font-medium text-good">suggested</span>}</span>
+            <span className="block font-semibold">{PROVIDERS[id].name}{PROVIDERS[id].badge && <span className="ml-1.5 text-xs font-medium text-good">{PROVIDERS[id].badge}</span>}</span>
             <span className="block text-xs text-muted">{PROVIDERS[id].blurb}</span>
           </button>
         ))}
@@ -101,8 +101,24 @@ function Inner() {
           <>
             <input className="input mt-1 font-mono text-sm" list={listId} value={model} onChange={(e) => setModel(e.target.value)}
               placeholder={models ? "Type to search the list" : "Test the connection to load the list"} spellCheck={false} />
-            <datalist id={listId}>{models?.map((m) => <option key={m} value={m} />)}</datalist>
-            {models && <span className="mt-1 block text-xs text-muted">{models.length} models available.</span>}
+            <datalist id={listId}>{models && [...models].sort((a, b) => Number(b.endsWith(":free")) - Number(a.endsWith(":free"))).map((m) => <option key={m} value={m} />)}</datalist>
+            {models && (
+              <span className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted">
+                {models.length} models available
+                {provider === "openrouter" && (() => {
+                  const free = pickFreeModel(models);
+                  const n = models.filter((m) => m.endsWith(":free")).length;
+                  return free ? (
+                    <>
+                      <span>· {n} free</span>
+                      <button type="button" className="font-semibold text-accent" onClick={() => { setModel(free); setAiConfig({ provider, key: key.trim(), model: free }); setMsg({ ok: true, text: `Now using the free model ${free}. Free models have daily limits and can be slower.` }); }}>
+                        Use a free model
+                      </button>
+                    </>
+                  ) : null;
+                })()}
+              </span>
+            )}
           </>
         )}
       </label>
@@ -120,6 +136,7 @@ function Inner() {
       </div>
       {msg && <p className={`text-sm ${msg.ok ? "text-good" : "text-accent"}`} role="status">{msg.text}</p>}
       <p className="text-xs text-muted">
+        {provider === "gemini" && <>Create a free key at Google AI Studio with your Google account. The free tier has daily limits (Google may use free-tier conversations to improve its products). </>}
         Your key is stored only in this browser. It isn&apos;t synced to your account or sent to our server: requests go straight from your device to {p.name}.
         Testing the connection doesn&apos;t use any credit.
       </p>
