@@ -156,7 +156,7 @@ function Prompt({ item, mode, onScore, onNext }: { item: Item; mode: Mode; onSco
     return () => clearTimeout(t);
   }, [rec.listening, rec.alternatives, item]);
 
-  const talk = () => { stopAll(); setResult(null); rec.reset(); rec.start(); };
+  const talk = () => { stopAll(); setResult(null); rec.reset(); rec.start({ target: item.zh }); };
 
   return (
     <div className="space-y-4">

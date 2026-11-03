@@ -242,7 +242,7 @@ function MyTurn({ line, speed, dialogueId, index, onScore, onNext }: {
     return () => clearTimeout(t);
   }, [rec.listening, rec.alternatives, line.zh, dialogueId, index]);
 
-  const talk = () => { stopAll(); setResult(null); rec.reset(); rec.start(); };
+  const talk = () => { stopAll(); setResult(null); rec.reset(); rec.start({ target: line.zh }); };
 
   return (
     <Bubble line={line} active>

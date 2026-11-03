@@ -168,7 +168,7 @@ function SpeakItem({ heading, hint, target, audio, showText, reveal, onDone }: {
       )}
       {showText && <p className="han text-3xl leading-relaxed">{target}</p>}
       <div className="flex flex-wrap items-center gap-3">
-        <button onClick={() => (rec.listening ? rec.stop() : (stopAll(), rec.reset(), rec.start()))} disabled={!!audio && plays === 0}
+        <button onClick={() => (rec.listening ? rec.stop() : (stopAll(), rec.reset(), rec.start({ target })))} disabled={!!audio && plays === 0}
           className={`flex h-14 w-14 items-center justify-center rounded-full ${rec.listening ? "bg-accent text-accent-fg" : "bg-accent-soft text-accent"} disabled:opacity-40`}
           aria-label={rec.listening ? "Stop" : "Start speaking"}>
           {rec.listening ? <Square size={20} /> : <Mic size={24} />}
@@ -184,7 +184,7 @@ function SpeakItem({ heading, hint, target, audio, showText, reveal, onDone }: {
         </div>
       )}
       <div className="flex gap-2">
-        {best && <button className="btn btn-sm" onClick={() => { rec.reset(); rec.start(); }}><RotateCcw size={14} /> Try once more</button>}
+        {best && <button className="btn btn-sm" onClick={() => { rec.reset(); rec.start({ target }); }}><RotateCcw size={14} /> Try once more</button>}
         <button className="btn btn-primary btn-sm ml-auto" disabled={rec.listening} onClick={() => { logPractice(1); onDone(best?.score ?? 0); }}>
           {best ? "Next" : "Skip"}
         </button>
