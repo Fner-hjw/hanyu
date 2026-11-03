@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   icons: { icon: "/icon-192.png", apple: "/apple-icon.png" },
   appleWebApp: { capable: true, title: "Hanyu Easy", statusBarStyle: "default" },
   // Google Search Console ownership check (HTML-tag method). GOOGLE_SITE_VERIFICATION in Vercel overrides it.
-  verification: { google: process.env.GOOGLE_SITE_VERIFICATION || "zt-5gLEJ52OYyRQ4BS6dOZHpdhroMdEH_DqywmhIWag" },
+  verification: { google: process.env.GOOGLE_SITE_VERIFICATION || "9kjUbit1uPUWA1fWwQ65xaDwVP1TzmQh3gu_ki-Qybs" },
 };
 export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#c4352b" };
 
