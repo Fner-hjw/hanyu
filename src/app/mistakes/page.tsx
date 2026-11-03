@@ -6,7 +6,7 @@ import { ArrowRight, Check, Layers, Trash2 } from "lucide-react";
 import { resolveMistakes, type ResolvedMistake } from "@/lib/mistakes";
 import { sentenceAudio, useAsync, type Word } from "@/lib/data";
 import { clearMistake, useAppState, useHydrated } from "@/lib/store";
-import { Badge, Empty, PageHeader } from "@/components/ui";
+import { Badge, Empty, PageHeader, plural } from "@/components/ui";
 import { SpeakButton } from "@/components/Speak";
 import { WordSheet } from "@/components/WordSheet";
 
@@ -33,7 +33,7 @@ function Mistakes() {
   return (
     <div>
       <PageHeader title="Mistakes" subtitle="Everything you got wrong, in one place. Items leave the list automatically when you get them right later — or clear them yourself."
-        actions={words.length > 0 ? <Link href="/flashcards?deck=mistakes" className="btn btn-primary"><Layers size={16} /> Review {words.length} words</Link> : undefined} />
+        actions={words.length > 0 ? <Link href="/flashcards?deck=mistakes" className="btn btn-primary"><Layers size={16} /> Review {plural(words.length, "word")}</Link> : undefined} />
       {data.loading && <p className="text-muted">Loading…</p>}
       {!data.loading && items.length === 0 && <Empty title="No open mistakes">Nice — keep practising and anything you miss will show up here.</Empty>}
       <div className="space-y-6">

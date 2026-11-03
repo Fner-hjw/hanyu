@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ALL_DIALOGUES, SCENARIO_LABEL } from "@/data/dialogues-all";
 import { useAppState, useHydrated } from "@/lib/store";
-import { Badge, PageHeader } from "@/components/ui";
+import { Badge, PageHeader, plural } from "@/components/ui";
 
 type Kind = "all" | "daily" | "work";
 
@@ -51,9 +51,9 @@ function Dialogues() {
                 <div className="font-semibold">{d.title}</div>
               </div>
               <div className="flex flex-wrap items-center gap-1.5">
-                <Badge tone="sky">{SCENARIO_LABEL[d.scenario]}</Badge>
-                <Badge tone="gold">HSK {d.level}</Badge>
-                <span className="text-xs text-muted">{d.lines.length} lines</span>
+                <Badge>{SCENARIO_LABEL[d.scenario]}</Badge>
+                <Badge>HSK {d.level}</Badge>
+                <span className="text-xs text-muted">{plural(d.lines.length, "line")}</span>
               </div>
               <p className="line-clamp-2 text-sm text-muted">{d.intro}</p>
               {d.id in s.dialoguesDone && <div className="mt-auto text-sm font-semibold text-good">✓ best {s.dialoguesDone[d.id]}%</div>}

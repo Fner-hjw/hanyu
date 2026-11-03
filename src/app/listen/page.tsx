@@ -9,7 +9,7 @@ import { compareHanzi, comparePinyin, isHanInput, type Compared } from "@/lib/co
 import { addMistake, clearMistake, logPractice, useHydrated } from "@/lib/store";
 import { Annotated } from "@/components/Annotated";
 import { Marked, ScorePill } from "@/components/Marked";
-import { PageHeader, Progress } from "@/components/ui";
+import { PageHeader, Progress, plural } from "@/components/ui";
 
 type Mode = "meaning" | "dictation";
 const LEVELS = [1, 2, 3, 4, 5, 6];
@@ -86,7 +86,7 @@ function Session({ items, pool, mode, slow, setSlow, seed, onExit, onAgain }: {
     return (
       <div className="card pop mx-auto max-w-lg p-8 text-center">
         <div className="hanzi text-5xl text-accent">{avg >= 80 ? "耳朵很好！" : "继续练习！"}</div>
-        <p className="mt-3 text-lg font-semibold">Average {avg}% over {scores.length} sentences</p>
+        <p className="mt-3 text-lg font-semibold">Average {avg}% over {plural(scores.length, "sentence")}</p>
         <p className="text-sm text-muted">Sentences under 60% were added to your Mistakes.</p>
         <div className="mt-5 flex justify-center gap-2">
           <button className="btn btn-primary" onClick={onAgain}><RotateCcw size={15} /> New round</button>

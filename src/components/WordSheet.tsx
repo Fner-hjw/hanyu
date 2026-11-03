@@ -49,7 +49,7 @@ function WordDetail({ word, onClose }: { word: Word; onClose: () => void }) {
     <div className="space-y-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-wrap gap-1.5">
-          {word.level > 0 ? <Badge tone="accent">{levelLabel(word.level)}</Badge> : word.topic && <Badge tone="gold">{TOPICS[word.topic]}</Badge>}
+          {word.level > 0 ? <Badge>{levelLabel(word.level)}</Badge> : word.topic && <Badge>{TOPICS[word.topic]}</Badge>}
           {word.pos.map((p) => <Badge key={p}>{p}</Badge>)}
           <StatusBadge status={status} />
         </div>

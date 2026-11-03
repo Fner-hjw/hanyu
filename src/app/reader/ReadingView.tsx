@@ -85,9 +85,9 @@ export function ReadingView({ reading, onBack }: { reading: Reading; onBack: () 
         <h2 className="hanzi text-2xl">{reading.titleZh}</h2>
         <p className="text-muted">{reading.title}</p>
         <div className="flex flex-wrap gap-1.5">
-          <Badge tone="accent">HSK {reading.level}</Badge>
+          <Badge>HSK {reading.level}</Badge>
           <Badge>{reading.genre}</Badge>
-          {reading.work && <Badge tone="gold">Work</Badge>}
+          {reading.work && <Badge>Work</Badge>}
         </div>
       </header>
 

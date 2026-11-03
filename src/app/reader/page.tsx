@@ -38,9 +38,9 @@ function Card({ r, best, onOpen }: { r: Reading; best: number | undefined; onOpe
       <div className="hanzi text-xl">{r.titleZh}</div>
       <div className="text-sm text-muted">{r.title}</div>
       <div className="flex flex-wrap items-center gap-1.5">
-        <Badge tone="accent">HSK {r.level}</Badge>
+        <Badge>HSK {r.level}</Badge>
         <Badge>{r.genre}</Badge>
-        {r.work && <Badge tone="gold">Work</Badge>}
+        {r.work && <Badge>Work</Badge>}
         <span className="text-xs text-muted">≈{hanCount(r.text)} 字</span>
       </div>
       {best !== undefined && <div className="text-xs font-semibold text-good">Best: {best}%</div>}
