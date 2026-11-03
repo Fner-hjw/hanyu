@@ -58,7 +58,8 @@ function Storage() {
 type Mode = "signin" | "signup" | "link" | "forgot";
 
 function SignInCard({ settings, loading }: { settings: AuthSettings | null; loading: boolean }) {
-  const { signIn, signInPassword, signUp, signInOAuth, resetPassword } = useSync();
+  const { signIn, signInPassword, signUp, signInOAuth, resetPassword, resendConfirmation } = useSync();
+  const [unconfirmed, setUnconfirmed] = useState(false);
   const [mode, setMode] = useState<Mode>("signin");
   const [addr, setAddr] = useState("");
   const [pw, setPw] = useState("");
@@ -71,14 +72,17 @@ function SignInCard({ settings, loading }: { settings: AuthSettings | null; load
     e.preventDefault();
     setBusy(true);
     setMsg(null);
+    setUnconfirmed(false);
     const a = addr.trim();
     let out: { ok: boolean; text: string } | null = null;
     if (mode === "signin") {
       const err = await signInPassword(a, pw);
-      if (err) out = { ok: false, text: err === "Invalid login credentials" ? "Wrong email or password." : err };
+      if (err === "Email not confirmed") { setUnconfirmed(true); out = { ok: false, text: "Please confirm your email first: open the link we sent you." }; }
+      else if (err) out = { ok: false, text: err === "Invalid login credentials" ? "Wrong email or password." : err };
     } else if (mode === "signup") {
       const r = await signUp(a, pw);
-      out = r.error ? { ok: false, text: r.error } : r.confirm ? { ok: true, text: "Account created. Open the confirmation email, then sign in." } : null;
+      if (r.confirm) setUnconfirmed(true);
+      out = r.error ? { ok: false, text: r.error } : r.confirm ? { ok: true, text: "Almost done: we emailed you a confirmation link. Open it on this device and you'll be signed in." } : null;
     } else if (mode === "link") {
       const err = await signIn(a);
       out = err ? { ok: false, text: err } : { ok: true, text: "Check your inbox and open the link on this device." };
@@ -134,13 +138,21 @@ function SignInCard({ settings, loading }: { settings: AuthSettings | null; load
               {busy ? "Please wait…" : { signin: "Sign in", signup: "Create account", link: "Send sign-in link", forgot: "Send reset link" }[mode]}
             </button>
             {msg && <p className={`text-sm ${msg.ok ? "text-good" : "text-accent"}`} role="status">{msg.text}</p>}
+            {unconfirmed && (
+              <button type="button" className="btn btn-sm" disabled={busy} onClick={async () => {
+                setBusy(true);
+                const err = await resendConfirmation(addr.trim());
+                setMsg(err ? { ok: false, text: err } : { ok: true, text: "Confirmation email sent again. Check spam too." });
+                setBusy(false);
+              }}>Resend confirmation email</button>
+            )}
             <p className="text-xs text-muted">
               {mode === "signin" && <button type="button" className="font-semibold text-accent" onClick={() => { setMode("forgot"); setMsg(null); }}>Forgot password?</button>}
               {mode === "signup" && (settings?.signupDisabled
                 ? "New sign-ups are switched off for this app."
                 : settings?.autoconfirm
                   ? "You'll be signed in straight away; no email is sent."
-                  : "Supabase will email you a link to confirm the address.")}
+                  : "We'll email you a link to confirm your address.")}
               {mode === "link" && "No password: we email you a one-time link. Useful on a new device."}
               {mode === "forgot" && <button type="button" className="font-semibold text-accent" onClick={() => { setMode("signin"); setMsg(null); }}>Back to sign in</button>}
             </p>
@@ -255,15 +267,19 @@ function Setup() {
 function OwnerNotes({ settings }: { settings: AuthSettings | null }) {
   return (
     <details className="card-flat p-4 text-sm">
-      <summary className="cursor-pointer font-semibold"><Mail size={15} className="mr-1.5 inline" />For the site owner: sign-in without an email server</summary>
+      <summary className="cursor-pointer font-semibold"><Mail size={15} className="mr-1.5 inline" />For the site owner: email verification and sign-in methods</summary>
       <div className="mt-3 space-y-2 text-muted">
-        <p>Supabase&apos;s built-in mailer only sends a few emails per hour, and only to your project team&apos;s addresses. To avoid needing email at all:</p>
+        <p>
+          Email verification needs an SMTP server: Supabase&apos;s built-in mailer only sends a few emails per hour, and only to your project team.
+          Connect a free one under <b>Authentication → Emails → SMTP Settings</b> and keep <b>Confirm email</b> on.
+          {settings && <> Confirm email is currently <Badge tone={settings.autoconfirm ? "muted" : "good"}>{settings.autoconfirm ? "off" : "on"}</Badge>.</>}
+        </p>
         <ul className="list-disc space-y-1.5 pl-5">
-          <li><b>Passwords, no email:</b> Authentication → Sign In / Providers → Email → turn off <b>Confirm email</b>. {settings && <Badge tone={settings.autoconfirm ? "good" : "muted"}>{settings.autoconfirm ? "on" : "currently required"}</Badge>}</li>
-          <li><b>GitHub:</b> create an OAuth app at github.com/settings/developers with callback <code>https://YOUR-PROJECT.supabase.co/auth/v1/callback</code>, then paste its ID and secret under Providers → GitHub. {settings && <Badge tone={settings.github ? "good" : "muted"}>{settings.github ? "on" : "off"}</Badge>}</li>
-          <li><b>Google:</b> create an OAuth client in Google Cloud Console (same callback URL), then Providers → Google. {settings && <Badge tone={settings.google ? "good" : "muted"}>{settings.google ? "on" : "off"}</Badge>}</li>
-          <li><b>Private app:</b> after creating your own account, turn off <b>Allow new users to sign up</b> so nobody else can register.</li>
-          <li>For password resets and email links to anyone, connect a free SMTP service (e.g. Resend) under Authentication → Emails → SMTP.</li>
+          <li><b>Gmail</b> (no domain needed, ~500 emails/day): turn on 2-step verification, create an app password, then use host <code>smtp.gmail.com</code>, port <code>465</code>, your Gmail address as user and sender, and the app password.</li>
+          <li><b>Brevo</b> (300 emails/day free): verify your sender address in Brevo, then copy its SMTP host, login and key.</li>
+          <li><b>Resend</b> (3,000/month free): best deliverability, but you need your own domain to email anyone besides yourself.</li>
+          <li><b>GitHub / Google:</b> add an OAuth app with callback <code>https://YOUR-PROJECT.supabase.co/auth/v1/callback</code> under Providers. {settings && <><Badge tone={settings.github ? "good" : "muted"}>GitHub {settings.github ? "on" : "off"}</Badge> <Badge tone={settings.google ? "good" : "muted"}>Google {settings.google ? "on" : "off"}</Badge></>}</li>
+          <li><b>Private app:</b> after creating your account, turn off <b>Allow new users to sign up</b>.</li>
         </ul>
         <p>Your progress is stored in <b>Table Editor → progress</b>: one row per user, with all data in the <code>data</code> column.</p>
       </div>

@@ -24,6 +24,7 @@ type Ctx = {
   signUp: (email: string, password: string) => Promise<{ error: string | null; confirm: boolean }>;
   signInOAuth: (provider: OAuthProvider) => Promise<string | null>;
   resetPassword: (email: string) => Promise<string | null>;
+  resendConfirmation: (email: string) => Promise<string | null>;
   updatePassword: (password: string) => Promise<string | null>;
   signOut: () => Promise<void>;
 };
@@ -34,7 +35,7 @@ const SyncCtx = createContext<Ctx>({
   status: "off", email: null, error: null, lastSynced: null,
   provider: null, recovery: false, syncNow: async () => {},
   signIn: async () => NOT_SET, signInPassword: async () => NOT_SET, signUp: async () => ({ error: NOT_SET, confirm: false }),
-  signInOAuth: async () => NOT_SET, resetPassword: async () => NOT_SET, updatePassword: async () => NOT_SET, signOut: async () => {},
+  signInOAuth: async () => NOT_SET, resetPassword: async () => NOT_SET, resendConfirmation: async () => NOT_SET, updatePassword: async () => NOT_SET, signOut: async () => {},
 });
 const back = () => `${window.location.origin}/account`;
 export const useSync = () => useContext(SyncCtx);
@@ -145,6 +146,11 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
     const { error: e } = await sb.auth.resetPasswordForEmail(addr, { redirectTo: back() });
     return e ? e.message : null;
   }, [sb]);
+  const resendConfirmation = useCallback(async (addr: string) => {
+    if (!sb) return NOT_SET;
+    const { error: e } = await sb.auth.resend({ type: "signup", email: addr, options: { emailRedirectTo: back() } });
+    return e ? e.message : null;
+  }, [sb]);
   const updatePassword = useCallback(async (password: string) => {
     if (!sb) return NOT_SET;
     const { error: e } = await sb.auth.updateUser({ password });
@@ -156,7 +162,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   return (
     <SyncCtx.Provider value={{
       status, email, error, lastSynced, provider, recovery, syncNow: sync,
-      signIn, signInPassword, signUp, signInOAuth, resetPassword, updatePassword, signOut,
+      signIn, signInPassword, signUp, signInOAuth, resetPassword, resendConfirmation, updatePassword, signOut,
     }}>
       {children}
     </SyncCtx.Provider>
