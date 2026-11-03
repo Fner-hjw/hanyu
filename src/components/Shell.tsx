@@ -97,7 +97,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* ---- main ---- */}
-      <div className="min-w-0">
+      <div className="flex min-h-dvh min-w-0 flex-col">
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-line bg-bg/85 px-4 py-2.5 backdrop-blur lg:hidden">
           <Link href="/" className="flex items-center gap-2"><Seal size={30} /><span className="font-bold">Hanyu Easy</span></Link>
           <div className="flex items-center gap-3 text-sm">
@@ -110,8 +110,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <CloudOff size={14} className="shrink-0" /> Offline. Your progress is saved on this device{email ? " and will sync when you're back online" : ""}.
           </div>
         )}
-        <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 lg:px-8 lg:pb-12 lg:pt-8">{children}</main>
-        <footer className="mx-auto max-w-5xl px-4 pb-24 text-xs text-muted lg:px-8 lg:pb-8">
+        <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-28 pt-6 lg:px-8 lg:pb-12 lg:pt-8">{children}</main>
+        <footer className="mx-auto w-full max-w-5xl px-4 pb-24 text-xs text-muted lg:px-8 lg:pb-8">
           Data: HSK 3.1 syllabus · CC-CEDICT (CC BY-SA 4.0) · HSK sentences &amp; audio by no7z (CC BY-SA 4.0) · Wikimedia CCD.
           <span className="mt-1 block"><Link href="/privacy" className="hover:text-fg">Privacy Policy</Link> · <Link href="/terms" className="hover:text-fg">Terms of Service</Link></span>
         </footer>
