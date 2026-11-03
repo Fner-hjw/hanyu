@@ -20,9 +20,10 @@ export default function Privacy() {
           is stored only in your browser&apos;s local storage on your device. We do not receive it.</p>
         <p><b>With an account (optional cloud sync).</b> If you sign in, we store:</p>
         <List>
-          <li><b>Account information:</b> your email address, a unique user ID, the sign-in method you used and sign-in timestamps. If you sign up with email, your password is stored only as a secure hash by our authentication provider.</li>
+          <li><b>Account information:</b> your email address, a unique user ID, the sign-in method you used and sign-in timestamps.</li>
           <li><b>Google Sign-In data:</b> if you choose &ldquo;Continue with Google&rdquo;, Google shares your email address, your name, your profile picture URL and your Google account ID with us (the <code>openid</code>, <code>email</code> and <code>profile</code> scopes). We request no other Google data and have no access to your Gmail, Drive, contacts, calendar or any other Google service.</li>
-          <li><b>GitHub sign-in data:</b> if you choose &ldquo;Continue with GitHub&rdquo;, GitHub shares your email address, username and avatar URL.</li>
+          <li><b>GitHub or Microsoft sign-in data:</b> if you choose one of them, that provider shares your email address, name or username and, for GitHub, your avatar URL.</li>
+          <li><b>Passkeys:</b> if you add a passkey, we store only its public key, a name and the dates it was added and last used. Your fingerprint, face or device PIN never leaves your device.</li>
           <li><b>Learning progress:</b> a copy of the progress data described above, so it can be synced between your devices.</li>
         </List>
         <p><b>Technical data.</b> Like any website, our hosting provider automatically processes your IP address, browser type and request logs to serve pages and protect against abuse. We do not use analytics, advertising or tracking cookies.</p>
@@ -32,7 +33,6 @@ export default function Privacy() {
         <List>
           <li>To sign you in and keep you signed in.</li>
           <li>To back up your learning progress and sync it across your devices.</li>
-          <li>To send emails you request: account confirmation, sign-in links and password resets.</li>
           <li>To keep the service secure and working.</li>
         </List>
         <p>We do not sell your information, use it for advertising, build profiles about you, or use it to train AI models.</p>
@@ -56,7 +56,7 @@ export default function Privacy() {
         <List>
           <li><b>Supabase</b> (authentication and database) stores your account and synced progress. Access is restricted so that each user can only read and write their own data.</li>
           <li><b>Vercel</b> hosts the website.</li>
-          <li><b>Google</b> or <b>GitHub</b>, only if you choose to sign in with them.</li>
+          <li><b>Google</b>, <b>GitHub</b> or <b>Microsoft</b>, only if you choose to sign in with them.</li>
         </List>
         <p>These providers process data on our behalf and may store it in the United States, the European Union or other countries. Data is encrypted in transit (HTTPS).</p>
       </Section>

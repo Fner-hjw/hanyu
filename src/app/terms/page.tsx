@@ -23,7 +23,7 @@ export default function Terms() {
       <Section title="2. Accounts">
         <List>
           <li>An account is optional and is only needed to sync progress between devices.</li>
-          <li>You can sign in with email, Google or GitHub. You must provide accurate information and keep your sign-in details secure; you are responsible for activity under your account.</li>
+          <li>You can sign in with Google, GitHub, Microsoft or a passkey. You must provide accurate information and keep your sign-in details secure; you are responsible for activity under your account.</li>
           <li>You must be at least 13 years old (or the minimum age required in your country) to create an account.</li>
           <li>You may stop using the app and delete your account at any time under Account → Delete account.</li>
         </List>
@@ -35,7 +35,7 @@ export default function Terms() {
           <li>break the law or infringe anyone&apos;s rights while using the app;</li>
           <li>attempt to access other users&apos; data, or probe, disrupt or overload the service or its infrastructure;</li>
           <li>use automated means to scrape or copy the service in a way that harms its availability;</li>
-          <li>use the app to send spam or abuse the sign-in or email features.</li>
+          <li>use the app to send spam or abuse the sign-in features.</li>
         </List>
         <p>We may suspend or delete accounts that break these rules.</p>
       </Section>

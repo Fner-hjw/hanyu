@@ -16,11 +16,14 @@ export function getSupabase(): SupabaseClient | null {
 
 export const syncConfigured = Boolean(url && key);
 
-export type OAuthProvider = "google" | "github";
+/** Free sign-in providers the app offers; each shows only when enabled in Supabase ("azure" is Microsoft). */
+export const OAUTH_PROVIDERS = ["google", "github", "azure"] as const;
+export type OAuthProvider = (typeof OAUTH_PROVIDERS)[number];
 export type AuthSettings = {
   /** which sign-in methods are switched on in the Supabase dashboard */
   google: boolean;
   github: boolean;
+  azure: boolean;
   email: boolean;
   /** "Confirm email" is off: new password accounts work immediately, no email sent */
   autoconfirm: boolean;
@@ -37,6 +40,7 @@ export async function getAuthSettings(): Promise<AuthSettings | null> {
     return {
       google: !!j.external?.google,
       github: !!j.external?.github,
+      azure: !!j.external?.azure,
       email: j.external?.email !== false,
       autoconfirm: !!j.mailer_autoconfirm,
       signupDisabled: !!j.disable_signup,

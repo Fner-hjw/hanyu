@@ -3,12 +3,12 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { Cloud, Download, HardDrive, KeyRound, WifiOff } from "lucide-react";
-import { useSync } from "@/components/SyncProvider";
+import { passkeyError, useSync } from "@/components/SyncProvider";
 import { AiSettings } from "@/components/AiSettings";
 import { PageHeader, Badge, Progress } from "@/components/ui";
 import { useAsync, levelLabel } from "@/lib/data";
 import { clearOffline, downloadForOffline, offlineStatus, offlineSupported } from "@/lib/offline";
-import { getAuthSettings, syncConfigured, type AuthSettings, type OAuthProvider } from "@/lib/supabase";
+import { getAuthSettings, getSupabase, OAUTH_PROVIDERS, syncConfigured, type AuthSettings, type OAuthProvider } from "@/lib/supabase";
 import { exportData, importData, resetData, todayKey, useAppState, useHydrated } from "@/lib/store";
 
 export default function Account() {
@@ -59,111 +59,33 @@ function Storage() {
 }
 
 /* ---------- sign in / create account ---------- */
-type Mode = "signin" | "signup" | "link" | "forgot";
+const PROVIDER_NAME: Record<OAuthProvider, string> = { google: "Google", github: "GitHub", azure: "Microsoft" };
 
 function SignInCard({ settings, loading }: { settings: AuthSettings | null; loading: boolean }) {
-  const { signIn, signInPassword, signUp, signInOAuth, resetPassword, resendConfirmation } = useSync();
-  const [unconfirmed, setUnconfirmed] = useState(false);
-  const [mode, setMode] = useState<Mode>("signin");
-  const [addr, setAddr] = useState("");
-  const [pw, setPw] = useState("");
+  const { signInOAuth, signInPasskey } = useSync();
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  const oauth = (["google", "github"] as OAuthProvider[]).filter((p) => settings?.[p]);
-  const emailOn = settings?.email !== false;
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    setMsg(null);
-    setUnconfirmed(false);
-    const a = addr.trim();
-    let out: { ok: boolean; text: string } | null = null;
-    if (mode === "signin") {
-      const err = await signInPassword(a, pw);
-      if (err === "Email not confirmed") { setUnconfirmed(true); out = { ok: false, text: "Please confirm your email first: open the link we sent you." }; }
-      else if (err) out = { ok: false, text: err === "Invalid login credentials" ? "Wrong email or password." : err };
-    } else if (mode === "signup") {
-      const r = await signUp(a, pw);
-      if (r.confirm) setUnconfirmed(true);
-      out = r.error ? { ok: false, text: r.error } : r.confirm ? { ok: true, text: "Almost done: we emailed you a confirmation link. Open it on this device and you'll be signed in." } : null;
-    } else if (mode === "link") {
-      const err = await signIn(a);
-      out = err ? { ok: false, text: err } : { ok: true, text: "Check your inbox and open the link on this device." };
-    } else {
-      const err = await resetPassword(a);
-      out = err ? { ok: false, text: err } : { ok: true, text: "If that email has an account, a reset link is on its way." };
-    }
-    setMsg(out);
-    setBusy(false);
-  };
-
-  const tabs: [Mode, string][] = [["signin", "Sign in"], ["signup", "Create account"], ["link", "Email link"]];
-  const needsPw = mode === "signin" || mode === "signup";
+  const [err, setErr] = useState<string | null>(null);
+  const providers = OAUTH_PROVIDERS.filter((p) => settings?.[p]);
 
   return (
     <div className="card space-y-4 p-5">
-      {oauth.length > 0 && (
+      {providers.length > 0 && (
         <div className="space-y-2">
-          {oauth.map((p) => (
+          {providers.map((p) => (
             <button key={p} type="button" className="btn w-full justify-center gap-2" disabled={busy}
-              onClick={async () => { setBusy(true); const err = await signInOAuth(p); if (err) { setMsg({ ok: false, text: err }); setBusy(false); } }}>
-              {p === "google" ? <GoogleMark /> : <GitHubMark />} Continue with {p === "google" ? "Google" : "GitHub"}
+              onClick={async () => { setBusy(true); setErr(null); const e = await signInOAuth(p); if (e) { setErr(e); setBusy(false); } }}>
+              {p === "google" ? <GoogleMark /> : p === "github" ? <GitHubMark /> : <MicrosoftMark />} Continue with {PROVIDER_NAME[p]}
             </button>
           ))}
-          {emailOn && <div className="flex items-center gap-3 pt-1 text-xs text-muted"><span className="h-px flex-1 bg-line" />or use email<span className="h-px flex-1 bg-line" /></div>}
         </div>
       )}
-
-      {emailOn && (
-        <>
-          {mode !== "forgot" && (
-            <div className="flex flex-wrap gap-1.5" role="tablist">
-              {tabs.map(([m, label]) => (
-                <button key={m} type="button" role="tab" aria-selected={mode === m} data-active={mode === m} className="chip"
-                  onClick={() => { setMode(m); setMsg(null); }}>{label}</button>
-              ))}
-            </div>
-          )}
-          <form className="space-y-3" onSubmit={submit}>
-            {mode === "forgot" && <p className="text-sm font-semibold">Reset your password</p>}
-            <label className="block">
-              <span className="eyebrow">Email</span>
-              <input type="email" required autoComplete="email" value={addr} onChange={(e) => setAddr(e.target.value)} placeholder="you@example.com" className="input mt-1" />
-            </label>
-            {needsPw && (
-              <label className="block">
-                <span className="eyebrow">Password</span>
-                <input type="password" required minLength={mode === "signup" ? 8 : 1} autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                  value={pw} onChange={(e) => setPw(e.target.value)} placeholder={mode === "signup" ? "At least 8 characters" : ""} className="input mt-1" />
-              </label>
-            )}
-            <button className="btn btn-primary w-full justify-center" disabled={busy}>
-              {busy ? "Please wait…" : { signin: "Sign in", signup: "Create account", link: "Send sign-in link", forgot: "Send reset link" }[mode]}
-            </button>
-            {msg && <p className={`text-sm ${msg.ok ? "text-good" : "text-accent"}`} role="status">{msg.text}</p>}
-            {unconfirmed && (
-              <button type="button" className="btn btn-sm" disabled={busy} onClick={async () => {
-                setBusy(true);
-                const err = await resendConfirmation(addr.trim());
-                setMsg(err ? { ok: false, text: err } : { ok: true, text: "Confirmation email sent again. Check spam too." });
-                setBusy(false);
-              }}>Resend confirmation email</button>
-            )}
-            <p className="text-xs text-muted">
-              {mode === "signin" && <button type="button" className="font-semibold text-accent" onClick={() => { setMode("forgot"); setMsg(null); }}>Forgot password?</button>}
-              {mode === "signup" && (settings?.signupDisabled
-                ? "New sign-ups are switched off for this app."
-                : settings?.autoconfirm
-                  ? "You'll be signed in straight away; no email is sent."
-                  : "We'll email you a link to confirm your address.")}
-              {mode === "link" && "No password: we email you a one-time link. Useful on a new device."}
-              {mode === "forgot" && <button type="button" className="font-semibold text-accent" onClick={() => { setMode("signin"); setMsg(null); }}>Back to sign in</button>}
-            </p>
-          </form>
-        </>
-      )}
-      {!loading && !emailOn && oauth.length === 0 && <p className="text-sm text-muted">No sign-in methods are enabled in Supabase yet.</p>}
+      <button type="button" className="btn w-full justify-center gap-2" disabled={busy}
+        onClick={async () => { setBusy(true); setErr(null); setErr(await signInPasskey()); setBusy(false); }}>
+        <KeyRound size={16} /> Sign in with a passkey
+      </button>
+      <p className="text-xs text-muted">New here? Sign in another way first, then add a passkey on this page.</p>
+      {err && <p className="text-sm text-accent" role="status">{err}</p>}
+      {loading && <p className="text-sm text-muted">Loading sign-in options…</p>}
       <p className="text-xs text-muted">Signing in merges what&apos;s on this device with your account, so nothing is lost.</p>
       <p className="text-xs text-muted">
         By continuing you agree to the <Link href="/terms" className="font-semibold text-accent">Terms of Service</Link> and{" "}
@@ -191,7 +113,7 @@ function SignedIn() {
   const { status, email, error, provider, syncNow, signOut, updatePassword } = useSync();
   const [pw, setPw] = useState("");
   const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  const label = provider === "google" ? "Google" : provider === "github" ? "GitHub" : "email";
+  const label = provider && provider in PROVIDER_NAME ? PROVIDER_NAME[provider as OAuthProvider] : "email";
   return (
     <div className="card space-y-4 p-5">
       <div>
@@ -203,6 +125,7 @@ function SignedIn() {
         <button onClick={() => void signOut()} className="btn">Sign out</button>
       </div>
       <p className="text-xs text-muted">Signing out keeps your progress on this device.</p>
+      <Passkeys />
       {provider === "email" && (
         <details className="text-sm">
           <summary className="cursor-pointer font-semibold">Change password</summary>
@@ -244,7 +167,7 @@ function DeleteAccount() {
       }}>
         <p>
           This permanently deletes the account <b>{email}</b> and all progress synced to it. It can&apos;t be undone.
-          If you signed in with Google or GitHub, you can also remove the app&apos;s access in that account&apos;s settings.
+          If you signed in with Google, GitHub or Microsoft, you can also remove the app&apos;s access in that account&apos;s settings.
         </p>
         <label className="flex items-center gap-2">
           <input type="checkbox" checked={wipeLocal} onChange={(e) => setWipeLocal(e.target.checked)} />
@@ -258,6 +181,58 @@ function DeleteAccount() {
         {err && <p className="text-accent" role="alert">{err}</p>}
       </form>
     </details>
+  );
+}
+
+type PasskeyItem = { id: string; friendly_name?: string; created_at: string; last_used_at?: string };
+
+function Passkeys() {
+  const sb = getSupabase();
+  const [list, setList] = useState<PasskeyItem[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const load = useAsync(async () => (sb ? (await sb.auth.passkey.list()).data ?? [] : []), []);
+  const items = list ?? load.data ?? [];
+  const refresh = async () => { if (sb) setList((await sb.auth.passkey.list()).data ?? []); };
+  if (!sb) return null;
+  const date = (d?: string) => (d ? new Date(d).toLocaleDateString() : "never");
+
+  return (
+    <div className="space-y-2 border-t border-line pt-4 text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p className="font-semibold">Passkeys</p>
+          <p className="text-xs text-muted">Sign in with Face ID, a fingerprint or your device PIN, without Google.</p>
+        </div>
+        <button className="btn btn-sm" disabled={busy} onClick={async () => {
+          setBusy(true); setMsg(null);
+          const { error } = await sb.auth.registerPasskey();
+          const text = error ? passkeyError(error) : null;
+          setMsg(error ? (text ? { ok: false, text } : null) : { ok: true, text: "Passkey added." });
+          if (!error) await refresh();
+          setBusy(false);
+        }}><KeyRound size={14} /> Add a passkey</button>
+      </div>
+      {items.length > 0 && (
+        <ul className="divide-y divide-line">
+          {items.map((k) => (
+            <li key={k.id} className="flex items-center justify-between gap-2 py-2">
+              <span className="min-w-0">
+                <span className="block truncate">{k.friendly_name || "Passkey"}</span>
+                <span className="text-xs text-muted">Added {date(k.created_at)} · last used {date(k.last_used_at)}</span>
+              </span>
+              <button className="btn btn-sm" disabled={busy} onClick={async () => {
+                setBusy(true); setMsg(null);
+                const { error } = await sb.auth.passkey.delete({ passkeyId: k.id });
+                if (error) setMsg({ ok: false, text: error.message }); else await refresh();
+                setBusy(false);
+              }}>Remove</button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {msg && <p className={msg.ok ? "text-good" : "text-accent"} role="status">{msg.text}</p>}
+    </div>
   );
 }
 
@@ -394,6 +369,16 @@ function GoogleMark() {
       <path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 7l7.4 5.7c4.3-4 6.9-9.9 6.9-17.2z" />
       <path fill="#FBBC05" d="M10.4 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.8-6A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.7l7.8-6z" />
       <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.5 2.3-6.4 0-11.7-4.1-13.6-9.8l-7.8 6C6.6 42.6 14.6 48 24 48z" />
+    </svg>
+  );
+}
+function MicrosoftMark() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 21 21" aria-hidden>
+      <rect x="1" y="1" width="9" height="9" fill="#F25022" />
+      <rect x="11" y="1" width="9" height="9" fill="#7FBA00" />
+      <rect x="1" y="11" width="9" height="9" fill="#00A4EF" />
+      <rect x="11" y="11" width="9" height="9" fill="#FFB900" />
     </svg>
   );
 }

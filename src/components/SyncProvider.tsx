@@ -23,6 +23,8 @@ type Ctx = {
   /** null = signed in straight away; "confirm" = Supabase sent a confirmation email */
   signUp: (email: string, password: string) => Promise<{ error: string | null; confirm: boolean }>;
   signInOAuth: (provider: OAuthProvider) => Promise<string | null>;
+  /** null on success or when the person cancels the browser prompt */
+  signInPasskey: () => Promise<string | null>;
   resetPassword: (email: string) => Promise<string | null>;
   resendConfirmation: (email: string) => Promise<string | null>;
   updatePassword: (password: string) => Promise<string | null>;
@@ -33,11 +35,19 @@ type Ctx = {
 
 const NOT_SET = "Sync is not configured";
 
+/** Turns a passkey error into a message; closing the browser prompt is not an error. */
+export function passkeyError(e: Error & { code?: string; cause?: unknown }): string | null {
+  const cause = e.cause instanceof Error ? e.cause.name : "";
+  if (e.code === "ERROR_CEREMONY_ABORTED" || e.name === "NotAllowedError" || cause === "NotAllowedError") return null;
+  if (e.code === "ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED") return "This device already has a passkey for your account.";
+  return e.message;
+}
+
 const SyncCtx = createContext<Ctx>({
   status: "off", email: null, error: null, lastSynced: null,
   provider: null, recovery: false, syncNow: async () => {},
   signIn: async () => NOT_SET, signInPassword: async () => NOT_SET, signUp: async () => ({ error: NOT_SET, confirm: false }),
-  signInOAuth: async () => NOT_SET, resetPassword: async () => NOT_SET, resendConfirmation: async () => NOT_SET, updatePassword: async () => NOT_SET, signOut: async () => {},
+  signInOAuth: async () => NOT_SET, signInPasskey: async () => NOT_SET, resetPassword: async () => NOT_SET, resendConfirmation: async () => NOT_SET, updatePassword: async () => NOT_SET, signOut: async () => {},
   deleteAccount: async () => NOT_SET,
 });
 const back = () => `${window.location.origin}/account`;
@@ -149,8 +159,13 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   }, [sb]);
   const signInOAuth = useCallback(async (p: OAuthProvider) => {
     if (!sb) return NOT_SET;
-    const { error: e } = await sb.auth.signInWithOAuth({ provider: p, options: { redirectTo: back() } });
+    const { error: e } = await sb.auth.signInWithOAuth({ provider: p, options: { redirectTo: back(), ...(p === "azure" && { scopes: "email" }) } });
     return e ? e.message : null;
+  }, [sb]);
+  const signInPasskey = useCallback(async () => {
+    if (!sb) return NOT_SET;
+    const { error: e } = await sb.auth.signInWithPasskey();
+    return e ? passkeyError(e) : null;
   }, [sb]);
   const resetPassword = useCallback(async (addr: string) => {
     if (!sb) return NOT_SET;
@@ -185,7 +200,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   return (
     <SyncCtx.Provider value={{
       status, email, error, lastSynced, provider, recovery, syncNow: sync,
-      signIn, signInPassword, signUp, signInOAuth, resetPassword, resendConfirmation, updatePassword, signOut, deleteAccount,
+      signIn, signInPassword, signUp, signInOAuth, signInPasskey, resetPassword, resendConfirmation, updatePassword, signOut, deleteAccount,
     }}>
       {children}
     </SyncCtx.Provider>
