@@ -86,7 +86,7 @@ export function SpeakingTest({ onExit }: { onExit: () => void }) {
       <div className="flex items-center gap-3">
         <button className="btn btn-sm" onClick={() => { stopAll(); onExit(); }}>Quit</button>
         <div className="flex-1"><Progress value={(done / total) * 100} /></div>
-        <Badge tone="sky">HSKK {t.name}</Badge>
+        <Badge>HSKK {t.name}</Badge>
       </div>
       {step.part === 1 && (
         <SpeakItem key={`r${step.i}`} heading={`Part 1 · Listen and repeat (${step.i + 1}/${paper.repeat.length})`}
@@ -127,7 +127,7 @@ function Intro({ onStart, onExit }: { onStart: (t: Tier) => void; onExit: () => 
           const t = TIERS[k];
           return (
             <div key={k} className="card flex flex-col p-5">
-              <div className="flex items-center gap-2"><h2 className="text-lg font-semibold">{t.name}</h2><span className="han text-muted">HSKK {t.zh}</span><Badge tone="sky">HSK {t.levels[0]}–{t.levels[1]}</Badge></div>
+              <div className="flex items-center gap-2"><h2 className="text-lg font-semibold">{t.name}</h2><span className="han text-muted">HSKK {t.zh}</span><Badge>HSK {t.levels[0]}–{t.levels[1]}</Badge></div>
               <ul className="mt-2 flex-1 list-disc space-y-1 pl-5 text-sm text-muted">
                 <li>{t.repeat} sentences to listen to and repeat</li>
                 <li>{t.read} sentences to read aloud{k === "adv" ? " from a workplace text" : ""}</li>

@@ -71,7 +71,7 @@ function Picker({ onPick }: { onPick: (s: Scenario) => void }) {
       <div className="grid gap-3 sm:grid-cols-2">
         {list.map((s) => (
           <button key={s.id} onClick={() => onPick(s)} className="card flex flex-col gap-1 p-4 text-left hover:-translate-y-0.5">
-            <span className="flex items-center gap-2"><span className="font-semibold">{s.title}</span><Badge tone="sky">HSK {s.level}</Badge></span>
+            <span className="flex items-center gap-2"><span className="font-semibold">{s.title}</span><Badge>HSK {s.level}</Badge></span>
             <span className="han text-sm text-muted">{s.titleZh}</span>
             <span className="text-sm text-muted">{s.brief}</span>
           </button>

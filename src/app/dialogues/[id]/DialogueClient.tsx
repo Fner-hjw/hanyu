@@ -8,7 +8,7 @@ import type { Dialogue, Line } from "@/data/dialogues";
 import { Annotated } from "@/components/Annotated";
 import { Marked, ScorePill } from "@/components/Marked";
 import { SpeakButton } from "@/components/Speak";
-import { Badge } from "@/components/ui";
+import { Badge, plural } from "@/components/ui";
 import { speak, stopAll } from "@/lib/audio";
 import { compareHanzi, type Compared } from "@/lib/compare";
 import { shuffleOptions } from "@/lib/shuffle";
@@ -49,9 +49,9 @@ function Inner({ id }: { id: string }) {
         <p className="font-semibold">{d.title}</p>
         <p className="mt-1 text-sm text-muted">{d.intro}</p>
         <div className="mt-2 flex flex-wrap gap-1.5">
-          <Badge tone="sky">{SCENARIO_LABEL[d.scenario]}</Badge>
-          <Badge tone="gold">HSK {d.level}</Badge>
-          <Badge>{d.lines.length} lines</Badge>
+          <Badge>{SCENARIO_LABEL[d.scenario]}</Badge>
+          <Badge>HSK {d.level}</Badge>
+          <Badge>{plural(d.lines.length, "line")}</Badge>
         </div>
       </header>
 

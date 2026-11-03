@@ -168,7 +168,7 @@ function PhrasesTab() {
                       <>
                         <p className="han text-lg">{p.zh}</p>
                         <p className="text-sm text-muted">{p.en}</p>
-                        {p.note && <span className="mt-1 inline-block"><Badge tone="gold">{p.note}</Badge></span>}
+                        {p.note && <span className="mt-1 inline-block"><Badge>{p.note}</Badge></span>}
                       </>
                     )}
                   </div>

@@ -48,6 +48,11 @@ export function Badge({ children, tone = "muted" }: { children: ReactNode; tone?
   return <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[0.7rem] font-semibold ${c}`}>{children}</span>;
 }
 
+/** "1 point", "2 points"; pass `many` for irregular plurals. */
+export function plural(n: number, one: string, many = `${one}s`) {
+  return `${n.toLocaleString()} ${n === 1 ? one : many}`;
+}
+
 export function Stat({ label, value, sub, icon }: { label: string; value: ReactNode; sub?: ReactNode; icon?: ReactNode }) {
   return (
     <div className="card p-4">

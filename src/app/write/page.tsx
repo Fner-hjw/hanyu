@@ -125,7 +125,7 @@ function Practice({ custom, setCustom }: { custom: string[] | null; setCustom: (
                 <div className="text-sm">{info?.[2]}</div>
                 <div className="mt-1 flex flex-wrap gap-1.5">
                   {info?.[3] ? <Badge>{info[3]} strokes</Badge> : null}
-                  {info && [info[5], info[6]].filter((p) => p && p !== ch && !p.includes("*")).map((p) => <Badge key={p} tone="sky">{p}</Badge>)}
+                  {info && [info[5], info[6]].filter((p) => p && p !== ch && !p.includes("*")).map((p) => <Badge key={p}>{p}</Badge>)}
                   {s.writing[ch] !== undefined && <Badge tone="good">best {s.writing[ch]}%</Badge>}
                 </div>
               </div>

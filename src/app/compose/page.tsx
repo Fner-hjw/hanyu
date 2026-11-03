@@ -158,7 +158,7 @@ function Exercise({ task, level, onNext }: { task: Task; level: number; onNext: 
         {task.mode === "pattern" && (
           <div>
             <div className="han text-2xl">{task.g.pattern}</div>
-            <div className="mt-1 flex items-center gap-2"><span className="font-semibold">{task.g.title}</span><Badge tone="sky">HSK {task.g.level}</Badge></div>
+            <div className="mt-1 flex items-center gap-2"><span className="font-semibold">{task.g.title}</span><Badge>HSK {task.g.level}</Badge></div>
             <p className="mt-2 text-sm text-muted">{task.g.explain}</p>
             <button className="mt-2 text-sm font-semibold text-accent" onClick={() => setShowEx(!showEx)}>{showEx ? "Hide example" : "Show an example"}</button>
             {showEx && task.g.examples[0] && <p className="mt-1 text-sm"><span className="han text-base">{task.g.examples[0].zh}</span> <span className="text-muted">{task.g.examples[0].en}</span></p>}

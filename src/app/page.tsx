@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, Flame, Layers, Sparkles, Target, Trophy } from "lucide-react";
-import { Badge, PageHeader, Progress, Ring, Stat } from "@/components/ui";
+import { PageHeader, Progress, Ring, Stat, plural } from "@/components/ui";
 import { HSK_LEVELS, LEVEL_SIZES, levelLabel, levelOfId, BIZ_WORDS } from "@/lib/data";
 import { visibleNav } from "@/lib/nav";
 import { dueCount, isKnown, streak, todayKey, updateSettings, useAppState, useHydrated } from "@/lib/store";
@@ -56,7 +56,7 @@ function Today() {
             <div className="mt-3 flex flex-wrap gap-2">
               <Link href="/flashcards" className="btn btn-primary"><Layers size={16} /> {due > 0 ? "Review now" : "Learn new words"}</Link>
               <Link href="/learn" className="btn">Continue the path</Link>
-              {Object.keys(s.mistakes).length > 0 && <Link href="/mistakes" className="btn">{Object.keys(s.mistakes).length} mistakes to revisit</Link>}
+              {Object.keys(s.mistakes).length > 0 && <Link href="/mistakes" className="btn">{plural(Object.keys(s.mistakes).length, "mistake")} to revisit</Link>}
             </div>
           </div>
         </div>
@@ -124,11 +124,19 @@ function Today() {
           </div>
           <div className="card p-5">
             <div className="mb-3 flex items-center justify-between"><h2 className="font-semibold">Progress</h2><Link href="/stats" className="flex items-center gap-1 text-sm text-accent">Details <ArrowRight size={14} /></Link></div>
-            <div className="flex flex-wrap gap-2 text-sm">
-              <Badge tone="good">{Object.keys(s.dialoguesDone).length} dialogues</Badge>
-              <Badge tone="sky">{Object.keys(s.grammarDone).length} grammar points</Badge>
-              <Badge tone="gold">{Object.keys(s.writing).length} characters written</Badge>
-            </div>
+            <dl className="grid grid-cols-3 gap-3">
+              {[
+                ["Dialogues", Object.keys(s.dialoguesDone).length, "done"],
+                ["Grammar", Object.keys(s.grammarDone).length, "studied"],
+                ["Characters", Object.keys(s.writing).length, "written"],
+              ].map(([label, n, verb]) => (
+                <div key={label}>
+                  <dt className="text-xs text-muted">{label}</dt>
+                  <dd className="text-2xl font-bold tracking-tight">{n}</dd>
+                  <dd className="text-xs text-muted">{verb}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </div>
       </section>
