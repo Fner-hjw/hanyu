@@ -11,7 +11,7 @@ export const HSKK_MID: HskkQuestion[] = [
   { zh: "请说说你的一个好朋友。你们是怎么认识的？", en: "Tell me about a good friend. How did you meet?" },
   { zh: "你觉得住在大城市好还是小城市好？请说说你的理由。", en: "Is it better to live in a big city or a small town? Give your reasons." },
   { zh: "你一般怎么去上班？路上要多长时间？", en: "How do you usually get to work? How long does it take?" },
-  { zh: "你最近买过什么东西？你为什么买它？", en: "What have you bought recently? Why did you buy it?" },
+  { zh: "你最近买过什么东西？你为什么买这个东西？", en: "What have you bought recently? Why did you buy it?" },
   { zh: "如果有一个星期的假期，你想做什么？", en: "If you had a week's holiday, what would you like to do?" },
 ];
 

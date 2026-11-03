@@ -98,7 +98,7 @@ export const SCENARIOS: Scenario[] = [
     opening: "喂，您好，财务部，我姓张。请问您是哪位？",
     openingEn: "Hello, finance department, Zhang speaking. May I ask who is calling?",
     phrases: [
-      { zh: "您好，我想跟您确认一下上个月那笔发票的付款情况。", en: "Hello, I would like to confirm the payment status of last month's invoice." },
+      { zh: "您好，我想跟您确认一下上个月那张发票的付款情况。", en: "Hello, I would like to confirm the payment status of last month's invoice." },
       { zh: "这笔款项已经逾期两个星期了。", en: "This payment is already two weeks overdue." },
       { zh: "请问是什么原因导致延迟的？", en: "May I ask what caused the delay?" },
       { zh: "您能告诉我具体的付款时间吗？", en: "Could you tell me the specific payment date?" },
@@ -179,7 +179,7 @@ export const SCENARIOS: Scenario[] = [
     opening: "您好，我在审阅十月份的账目时发现有一笔大额费用，金额是八十万元，但是我没有找到对应的合同。请您解释一下这笔账。",
     openingEn: "Hello. While reviewing the October accounts I found a large expense of 800,000 yuan, but I could not find the matching contract. Could you explain this entry?",
     phrases: [
-      { zh: "这笔费用是为了支付年度咨询服务费。", en: "This expense was to pay the annual consulting service fee." },
+      { zh: "这笔费用是年度咨询服务费。", en: "This expense was to pay the annual consulting service fee." },
       { zh: "合同原件在法务部，我今天就去调取。", en: "The original contract is with the legal department, and I will retrieve it today." },
       { zh: "当时是按照公司的审批流程办理的。", en: "It was handled at the time according to the company's approval process." },
       { zh: "凭证确实有些不完整，这是我们的疏忽。", en: "The vouchers are indeed incomplete, which is our oversight." },
@@ -208,7 +208,7 @@ export const SCENARIOS: Scenario[] = [
     phrases: [
       { zh: "我毕业于……大学，专业是金融。", en: "I graduated from ... University, majoring in finance." },
       { zh: "我最大的优点是做事认真，注重细节。", en: "My greatest strength is that I work conscientiously and pay attention to detail." },
-      { zh: "在上一份工作中，我帮公司把坏账率降低了百分之二。", en: "In my last job, I helped the company reduce its bad debt ratio by 2%." },
+      { zh: "在上一份工作中，我帮公司把坏账率降低了两个百分点。", en: "In my last job, I helped the company reduce its bad debt ratio by two percentage points." },
       { zh: "我希望能在中国的金融行业长期发展。", en: "I hope to develop long term in China's financial industry." },
       { zh: "我的缺点是有时候对自己要求太高。", en: "My weakness is that sometimes I demand too much of myself." },
       { zh: "我能承受工作压力，也愿意加班。", en: "I can handle work pressure and am willing to work overtime." },
@@ -265,7 +265,7 @@ export const SCENARIOS: Scenario[] = [
       { zh: "祝我们合作愉快！干杯！", en: "To a pleasant partnership! Cheers!" },
       { zh: "我酒量不太好，以茶代酒，您别见怪。", en: "I don't handle alcohol well, so I'll substitute tea. Please don't take offence." },
       { zh: "这道菜是这里的招牌菜，您尝尝。", en: "This dish is the house speciality, please try it." },
-      { zh: "您的家人都在上海吗？", en: "Is your family all in Shanghai?" },
+      { zh: "您的家人也都在这边吗？", en: "Is your family here too?" },
       { zh: "您太客气了，这是我们应该做的。", en: "You are too polite, it is what we should do." },
     ],
     notes: "Jovial and pushes drinks enthusiastically, insisting that you drink more, but respects a polite refusal given with a good reason. Ask personal-but-friendly questions about family and salary, and only bring up business, such as next year's contract, near the end.",
@@ -289,10 +289,10 @@ export const SCENARIOS: Scenario[] = [
     phrases: [
       { zh: "我不能吃辣，有什么不辣的菜推荐吗？", en: "I can't eat spicy food. Do you recommend any non-spicy dishes?" },
       { zh: "我对花生过敏，请问这道菜里有花生吗？", en: "I am allergic to peanuts. Is there any peanut in this dish?" },
-      { zh: "可以做微辣或者不放辣椒吗？", en: "Can you make it mildly spicy, or without chili?" },
+      { zh: "可以不放辣椒吗？", en: "Can you make it without chili?" },
       { zh: "这个菜是用什么做的？", en: "What is this dish made of?" },
       { zh: "我们两个人，点三个菜够吃吗？", en: "There are two of us. Are three dishes enough?" },
-      { zh: "麻烦再来两瓶啤酒，还有一碗米饭。", en: "Please bring two more bottles of beer and a bowl of rice." },
+      { zh: "麻烦来两瓶啤酒，还有一碗米饭。", en: "Please bring two bottles of beer and a bowl of rice." },
       { zh: "服务员，买单。", en: "Waiter, the bill please." },
     ],
     notes: "Friendly and rushed. Mention that many dishes use peanuts or chili oil and the kitchen cannot fully guarantee no cross-contamination, so the learner needs to decide what to do. Suggest one dish and say another is sold out.",
@@ -365,7 +365,7 @@ export const SCENARIOS: Scenario[] = [
       "Agree on a time and place",
       "Confirm the plan and say how you will get there",
     ],
-    opening: "嗨！这个周末你有空吗？天气预报说会很好，我们一起出去玩吧！",
+    opening: "嗨！这个周末你有空吗？天气预报说周末天气很好，我们一起出去玩吧！",
     openingEn: "Hi! Are you free this weekend? The forecast says the weather will be great, so let's go out together!",
     phrases: [
       { zh: "周六我有空，你想去哪儿？", en: "I'm free on Saturday. Where do you want to go?" },
