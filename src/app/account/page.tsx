@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 import { Cloud, Download, HardDrive, KeyRound, WifiOff } from "lucide-react";
 import { useSync } from "@/components/SyncProvider";
 import { AiSettings } from "@/components/AiSettings";
@@ -164,6 +165,10 @@ function SignInCard({ settings, loading }: { settings: AuthSettings | null; load
       )}
       {!loading && !emailOn && oauth.length === 0 && <p className="text-sm text-muted">No sign-in methods are enabled in Supabase yet.</p>}
       <p className="text-xs text-muted">Signing in merges what&apos;s on this device with your account, so nothing is lost.</p>
+      <p className="text-xs text-muted">
+        By continuing you agree to the <Link href="/terms" className="font-semibold text-accent">Terms of Service</Link> and{" "}
+        <Link href="/privacy" className="font-semibold text-accent">Privacy Policy</Link>.
+      </p>
     </div>
   );
 }

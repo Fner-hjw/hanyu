@@ -8,7 +8,7 @@ export async function GET() {
   const units: Record<number, string[]> = {};
   for (const { level, unit } of allUnits()) (units[level] ??= []).push(`/learn/${level}/${unit}`);
   return Response.json({
-    pages: [...new Set([...NAV.filter((n) => n.ready).map((n) => n.href), "/account", "/more", "/practice", "/offline"])],
+    pages: [...new Set([...NAV.filter((n) => n.ready).map((n) => n.href), "/account", "/more", "/practice", "/offline", "/privacy", "/terms"])],
     dialogues: ALL_DIALOGUES.map((d) => `/dialogues/${d.id}`),
     units,
     data: [

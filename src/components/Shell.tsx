@@ -113,6 +113,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 lg:px-8 lg:pb-12 lg:pt-8">{children}</main>
         <footer className="mx-auto max-w-5xl px-4 pb-24 text-xs text-muted lg:px-8 lg:pb-8">
           Data: HSK 3.1 syllabus · CC-CEDICT (CC BY-SA 4.0) · HSK sentences &amp; audio by no7z (CC BY-SA 4.0) · Wikimedia CCD.
+          <span className="mt-1 block"><Link href="/privacy" className="hover:text-fg">Privacy Policy</Link> · <Link href="/terms" className="hover:text-fg">Terms of Service</Link></span>
         </footer>
       </div>
 
