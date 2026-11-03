@@ -166,6 +166,15 @@ export function importData(json: string) {
   const parsed = JSON.parse(json);
   commit({ ...DEFAULT_STATE, ...parsed, settings: { ...DEFAULT_STATE.settings, ...parsed.settings } });
 }
+export function getState(): AppState {
+  load();
+  return state;
+}
+/** replace the whole state (used by cloud sync) */
+export function replaceState(next: AppState) {
+  load();
+  commit({ ...DEFAULT_STATE, ...next, settings: { ...DEFAULT_STATE.settings, ...next.settings } });
+}
 export function resetData() {
   commit(DEFAULT_STATE);
 }

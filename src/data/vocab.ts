@@ -5,6 +5,11 @@ export type Topic =
   | "negotiation"
   | "phone"
   | "fluency"
+  | "accounting"
+  | "banking"
+  | "markets"
+  | "business"
+  | "hr"
   | "general";
 
 export type Word = {
@@ -26,6 +31,11 @@ export const TOPICS: Record<Topic, string> = {
   negotiation: "Negotiation",
   phone: "Phone calls",
   fluency: "Fluency phrases",
+  accounting: "Accounting & audit",
+  banking: "Banking & payments",
+  markets: "Markets & investing",
+  business: "Corporate & strategy",
+  hr: "HR & office",
   general: "General",
 };
 
@@ -162,7 +172,9 @@ const rows: Row[] = [
   ["久仰", "jiǔyǎng", "I've long heard of you (formal greeting)", "general", 6, "久仰大名，今天终于见面了。", "I've long heard of you; finally we meet."],
 ];
 
-export const VOCAB: Word[] = rows.map(([zh, py, en, topic, level, ex, exEn], i) => ({
+import { PACK_ROWS } from "./vocab-pack";
+
+export const VOCAB: Word[] = [...rows, ...PACK_ROWS].map(([zh, py, en, topic, level, ex, exEn], i) => ({
   id: `w${String(i + 1).padStart(3, "0")}`,
   zh,
   py,

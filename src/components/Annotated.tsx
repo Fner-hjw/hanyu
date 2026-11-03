@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { tokenize } from "@/lib/text";
 import { SpeakButton } from "./Speak";
+import { lookupWithFallback, refineTokens } from "@/lib/dict";
 
 /** Chinese text with ruby pinyin and tap-a-word glosses. */
 export function Annotated({
@@ -14,9 +15,34 @@ export function Annotated({
   showPinyin?: boolean;
   size?: string;
 }) {
-  const tokens = useMemo(() => tokenize(text), [text]);
+  const base = useMemo(() => tokenize(text), [text]);
+  const [refined, setRefined] = useState<{ text: string; tokens: typeof base } | null>(null);
+  const tokens = refined?.text === text ? refined.tokens : base;
   const [sel, setSel] = useState<number | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    refineTokens(base).then((r) => {
+      if (!live) return;
+      setRefined({ text, tokens: r });
+      setSel(null);
+    });
+    return () => {
+      live = false;
+    };
+  }, [base, text]);
   const t = sel !== null ? tokens[sel] : null;
+  const [dict, setDict] = useState<{ word: string; entries: [string, string][] }[] | null>(null);
+
+  useEffect(() => {
+    if (!t || t.word) return;
+    let live = true;
+    lookupWithFallback(t.text).then((r) => live && setDict(r));
+    return () => {
+      live = false;
+      setDict(null);
+    };
+  }, [t]);
 
   return (
     <div>
@@ -43,9 +69,24 @@ export function Annotated({
         <div className="mt-2 flex items-center gap-3 rounded-lg border border-line bg-card px-3 py-2 text-sm">
           <SpeakButton text={t.text} rate={0.8} />
           <div>
-            <span className="han text-lg">{t.text}</span>{" "}
-            <span className="text-accent">{t.py}</span>
-            <div className="text-muted">{t.word ? t.word.en : "Not in your word list yet"}</div>
+            <span className="han text-lg">{t.text}</span>
+            {t.word && <span className="text-accent"> {t.py}</span>}
+            {t.word ? (
+              <div className="text-muted">{t.word.en} <span className="text-xs">· in your list</span></div>
+            ) : dict === null ? (
+              <div className="text-muted">Looking up…</div>
+            ) : dict.length === 0 ? (
+              <div className="text-muted">No dictionary entry found</div>
+            ) : (
+              dict.map((d) => (
+                <div key={d.word} className="mt-1 text-muted">
+                  {dict.length > 1 && <span className="han text-fg">{d.word} </span>}
+                  {d.entries.map(([py, m], i) => (
+                    <div key={i}><span className="text-accent">{py}</span> {m}</div>
+                  ))}
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}
