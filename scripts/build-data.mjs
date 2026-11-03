@@ -149,3 +149,4 @@ Character decomposition: Wikimedia Commons CCD table.
 Derived data in this folder is shared under CC BY-SA 4.0.
 `);
 console.log(`${out.length} words (${noMeaning} without meaning, ${withEx} with examples), ${sents.length} sentences, ${Object.keys(chars).length} chars, ${(size / 1e6).toFixed(1)} MB`);
+await import("./merge-examples.mjs");

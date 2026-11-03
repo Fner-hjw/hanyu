@@ -136,7 +136,7 @@ function Stats() {
   const dialogueScores = Object.values(s.dialoguesDone);
   const readingScores = Object.values(s.readingsDone);
   const writing = Object.values(s.writing);
-  const lastTest = s.tests[s.tests.length - 1];
+  const lastTest = s.tests.filter((t) => t.kind !== "speaking").at(-1);
   const recommended = plan.perDay === null ? null : clamp(plan.perDay, 5, 100);
 
   return (

@@ -10,6 +10,8 @@ export type StoredCard = Omit<Card, "due" | "last_review"> & { due: string; last
 
 export type TestResult = {
   date: string;
+  /** missing on results saved before speaking tests existed (placement/mock exam) */
+  kind?: "placement" | "exam" | "speaking";
   estimated: number;
   bySection: Record<string, { correct: number; total: number }>;
   byLevel: Record<string, { correct: number; total: number }>;

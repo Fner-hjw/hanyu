@@ -26,7 +26,7 @@ function Today() {
   const goal = s.settings.dailyGoal;
   const pct = Math.min(100, (done / goal) * 100);
   const known = new Set([...ids.filter((id) => isKnown(s.cards[id])), ...Object.keys(s.known)]).size;
-  const last = s.tests[s.tests.length - 1];
+  const last = s.tests.filter((t) => t.kind !== "speaking").at(-1);
   const days = streak(s);
 
   const perLevel = HSK_LEVELS.map((l) => {

@@ -5,6 +5,8 @@ import { GRAMMAR_MORE } from "../src/data/grammar-more.ts";
 import { DIALOGUES } from "../src/data/dialogues.ts";
 import { DIALOGUES_MORE } from "../src/data/dialogues-more.ts";
 import { READINGS } from "../src/data/readings.ts";
+import { DIALOGUES_FINANCE } from "../src/data/dialogues-finance.ts";
+import { SCENARIOS } from "../src/data/scenarios.ts";
 import { EMAILS, PHRASES, MEASURE_WORDS, ETIQUETTE } from "../src/data/toolkit.ts";
 import { RADICALS } from "../src/data/radicals.ts";
 
@@ -42,17 +44,28 @@ dist(`grammar (${GRAMMAR_MORE.length})`, ga);
 // ---- dialogues
 const dids = new Set(DIALOGUES.map((d) => d.id));
 const da: number[] = [];
-for (const d of DIALOGUES_MORE) {
+for (const d of [...DIALOGUES_MORE, ...DIALOGUES_FINANCE]) {
   if (dids.has(d.id)) warn(`dialogue dup id ${d.id}`); dids.add(d.id);
   if (d.lines.length < 8) warn(`${d.id}: only ${d.lines.length} lines`);
   if (d.questions.length !== 3) warn(`${d.id}: ${d.questions.length} questions`);
   d.lines.forEach((l, i) => { zhOk(`${d.id} L${i}`, l.zh); if (!l.en) warn(`${d.id} L${i}: no English`); });
   d.questions.forEach((q, i) => { mcq(`${d.id} Q${i}`, q.options, q.answer); da.push(q.answer); });
 }
-dist(`dialogues (${DIALOGUES_MORE.length})`, da);
+dist(`dialogues (${DIALOGUES_MORE.length + DIALOGUES_FINANCE.length})`, da);
+
+// ---- talk scenarios
+const sids = new Set<string>();
+for (const sc of SCENARIOS) {
+  if (sids.has(sc.id)) warn(`scenario dup id ${sc.id}`); sids.add(sc.id);
+  zhOk(sc.id, sc.opening);
+  sc.phrases.forEach((p) => zhOk(sc.id, p.zh));
+  if (sc.phrases.length < 5 || sc.phrases.length > 8) warn(`${sc.id}: ${sc.phrases.length} phrases`);
+}
+console.log(`scenarios: ${SCENARIOS.length}`);
 
 // ---- readings
-const LEN: Record<number, [number, number]> = { 2: [55, 110], 3: [95, 180], 4: [150, 275], 5: [250, 440], 6: [370, 620] };
+// minimums allow for workplace genres (emails, notices, chats), which are naturally shorter than essays
+const LEN: Record<number, [number, number]> = { 2: [55, 110], 3: [95, 180], 4: [150, 275], 5: [220, 440], 6: [300, 620] };
 const ra: number[] = [];
 const rids = new Set<string>();
 for (const r of READINGS) {

@@ -39,7 +39,8 @@ export function useRecognizer() {
 
   useEffect(() => () => rec.current?.abort(), []);
 
-  const start = useCallback(() => {
+  /** `continuous` keeps listening through pauses (for longer spoken answers) until stop() */
+  const start = useCallback((opts?: { continuous?: boolean }) => {
     const Ctor = getCtor();
     if (!Ctor) { setError("Speech recognition isn't supported in this browser. Try Chrome, Edge or Safari."); return; }
     rec.current?.abort();
@@ -47,7 +48,7 @@ export function useRecognizer() {
     r.lang = "zh-CN";
     r.interimResults = true;
     r.maxAlternatives = 3;
-    r.continuous = false;
+    r.continuous = !!opts?.continuous;
     setInterim(""); setAlternatives([]); setError(null);
     r.onresult = (e) => {
       let text = "";

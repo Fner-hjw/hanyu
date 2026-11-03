@@ -1,6 +1,7 @@
 import type { Reading } from "./types";
+import { READINGS_MORE } from "./readings-more";
 
-export const READINGS: Reading[] = [
+const READINGS_BASE: Reading[] = [
   // ───────────── Level 2 ─────────────
   {
     id: "r-saturday-diary",
@@ -563,3 +564,5 @@ export const READINGS: Reading[] = [
     ],
   },
 ];
+
+export const READINGS: Reading[] = [...READINGS_BASE, ...READINGS_MORE];

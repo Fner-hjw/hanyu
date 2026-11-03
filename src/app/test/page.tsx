@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ClipboardCheck, Compass, Play, Volume2 } from "lucide-react";
+import { ClipboardCheck, Compass, Mic, Play, Volume2 } from "lucide-react";
+import { SpeakingTest } from "./SpeakingTest";
 import { buildBlock, buildExam, estimateFrom, nextStep, type ExamQ, type Section } from "@/lib/exam";
 import { playUrl, speak, stopAll } from "@/lib/audio";
 import { sentenceAudio } from "@/lib/data";
@@ -18,6 +19,7 @@ export default function TestPage() {
 type Phase =
   | { kind: "home" }
   | { kind: "loading" }
+  | { kind: "speaking" }
   | { kind: "exam"; level: number; qs: ExamQ[] }
   | { kind: "examDone"; level: number; qs: ExamQ[]; picks: number[] }
   | { kind: "place"; level: number; block: number; qs: ExamQ[]; passed: Set<number>; history: { level: number; correct: number }[]; seed: number }
@@ -27,7 +29,8 @@ function Tests() {
   const s = useAppState();
   const [phase, setPhase] = useState<Phase>({ kind: "home" });
   const [examLevel, setExamLevel] = useState(4);
-  const last = s.tests[s.tests.length - 1];
+  const last = s.tests.filter((t) => t.kind !== "speaking").at(-1);
+  const lastSpeaking = s.tests.filter((t) => t.kind === "speaking").at(-1);
 
   const startExam = async () => {
     setPhase({ kind: "loading" });
@@ -41,11 +44,12 @@ function Tests() {
   };
 
   if (phase.kind === "loading") return <p className="text-muted">Preparing questions…</p>;
+  if (phase.kind === "speaking") return <SpeakingTest onExit={() => setPhase({ kind: "home" })} />;
 
   if (phase.kind === "exam") {
     return <Runner key={phase.qs[0]?.id} title={`HSK ${phase.level} mock exam`} qs={phase.qs} onFinish={(picks) => {
       record(phase.qs, picks);
-      saveTest(summarise(phase.qs, picks, phase.level));
+      saveTest({ ...summarise(phase.qs, picks, phase.level), kind: "exam" });
       setPhase({ kind: "examDone", level: phase.level, qs: phase.qs, picks });
     }} onQuit={() => setPhase({ kind: "home" })} />;
   }
@@ -61,7 +65,7 @@ function Tests() {
         const estimate = estimateFrom(step.passed);
         const byLevel: TestResult["byLevel"] = {};
         history.forEach((h) => { const b = (byLevel[h.level] ??= { correct: 0, total: 0 }); b.correct += h.correct; b.total += 6; });
-        saveTest({ date: new Date().toISOString(), estimated: estimate, bySection: {}, byLevel });
+        saveTest({ date: new Date().toISOString(), kind: "placement", estimated: estimate, bySection: {}, byLevel });
         setPhase({ kind: "placeDone", estimate, history });
       } else {
         setPhase({ kind: "loading" });
@@ -95,7 +99,7 @@ function Tests() {
   return (
     <div>
       <PageHeader title="Tests" subtitle="Find your level, then practise full mock exams. Every test is generated fresh from thousands of real sentences, so retakes are never the same." />
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <div className="card flex flex-col p-5">
           <Compass className="text-accent" />
           <h2 className="mt-2 text-lg font-semibold">Adaptive placement</h2>
@@ -110,13 +114,20 @@ function Tests() {
           <div className="mt-3 flex flex-wrap gap-2">{[1, 2, 3, 4, 5, 6].map((l) => <button key={l} className="chip" data-active={examLevel === l} onClick={() => setExamLevel(l)}>HSK {l}</button>)}</div>
           <button className="btn btn-primary mt-4 self-start" onClick={() => void startExam()}><Play size={16} /> Start HSK {examLevel} exam</button>
         </div>
+        <div className="card flex flex-col p-5">
+          <Mic className="text-accent" />
+          <h2 className="mt-2 text-lg font-semibold">Speaking test</h2>
+          <p className="mt-1 flex-1 text-sm text-muted">In the style of the HSKK oral exam: listen and repeat, read aloud, then answer two open questions out loud. Intermediate or advanced, about 10–15 minutes.</p>
+          {lastSpeaking && <p className="mt-3 text-sm">Last score: <b className="text-accent">{Math.round(Object.values(lastSpeaking.bySection).reduce((a, b) => a + b.correct, 0) / Math.max(1, Object.keys(lastSpeaking.bySection).length))}</b> · {new Date(lastSpeaking.date).toLocaleDateString()}</p>}
+          <button className="btn btn-primary mt-4 self-start" onClick={() => setPhase({ kind: "speaking" })}><Mic size={16} /> Start speaking test</button>
+        </div>
       </div>
       {s.tests.length > 0 && (
         <div className="card mt-4 p-4">
           <div className="eyebrow mb-2">History</div>
           <ul className="divide-y divide-line text-sm">
             {[...s.tests].reverse().slice(0, 8).map((t, i) => (
-              <li key={i} className="flex justify-between py-1.5"><span>{new Date(t.date).toLocaleDateString()}</span><span>{Object.keys(t.bySection).length ? "Mock exam" : "Placement"}</span><b>{t.estimated ? `HSK ${t.estimated}` : "—"}</b></li>
+              <li key={i} className="flex justify-between py-1.5"><span>{new Date(t.date).toLocaleDateString()}</span><span>{t.kind === "speaking" ? "Speaking test" : Object.keys(t.bySection).length ? "Mock exam" : "Placement"}</span><b>{t.kind === "speaking" ? `${Math.round(Object.values(t.bySection).reduce((a, b) => a + b.correct, 0) / Math.max(1, Object.keys(t.bySection).length))} / 100` : t.estimated ? `HSK ${t.estimated}` : "—"}</b></li>
             ))}
           </ul>
         </div>
