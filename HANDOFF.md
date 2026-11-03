@@ -93,7 +93,7 @@ Browser-test tips from this project:
 ## Phase 7 (next): suggested order
 1. ~~Offline mode~~ (done, 7b).
 2. ~~AI connection, conversation partner, writing practice~~ (done, 7c).
-3. ~~More content~~ (done, 7d). Every HSK 1–6 word now has at least one example sentence (1,019 hand-written ones in `src/data/examples-extra.json`; HSK 7–9 still has ~5,200 words without).
+3. ~~More content~~ (done, 7d). Every word in the syllabus (HSK 1–9, 10,958 words) now has at least one example sentence: 6,202 hand-written ones in `src/data/examples-extra.json` (read only by `scripts/merge-examples.mjs`, never bundled). HSK 7–9 (5,183) were written in 20 batches by Sonnet subagents, each fully audited by a fresh Opus subagent (296 corrections, mostly target words that only appeared inside a longer word, plus wrong senses, false facts, 个百分点 vs 百分之 misuse and a few politically sensitive examples), with Opus reviewing every correction before applying.
 4. ~~Spoken test~~ (done, 7d).
 5. ~~Writing practice~~ (done in 7c as `/compose`).
 6. ~~Independent content audit~~ (done, 7e): six fresh Opus auditors with a fixed checklist (brief kept in the commit message); 122 findings reviewed and applied. Re-run the same way after large content additions.
