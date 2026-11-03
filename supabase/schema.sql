@@ -25,3 +25,8 @@ $$;
 
 revoke execute on function public.delete_account() from public, anon;
 grant execute on function public.delete_account() to authenticated;
+
+-- Caps each user's saved progress (stored, compressed size) so nobody can fill the database.
+-- A learner with every HSK word in review stays far below this.
+alter table public.progress drop constraint if exists progress_size;
+alter table public.progress add constraint progress_size check (pg_column_size(data) < 5000000);
