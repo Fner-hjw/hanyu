@@ -1,7 +1,8 @@
 "use client";
 
+import type { Session } from "@supabase/supabase-js";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { getSupabase, syncConfigured } from "@/lib/supabase";
+import { getSupabase, syncConfigured, type OAuthProvider } from "@/lib/supabase";
 import { fingerprint, mergeStates } from "@/lib/merge";
 import { DEFAULT_STATE, getState, replaceState, useAppState, type AppState } from "@/lib/store";
 
@@ -12,14 +13,30 @@ type Ctx = {
   error: string | null;
   lastSynced: Date | null;
   syncNow: () => Promise<void>;
+  /** how the current user signed in, e.g. "email", "google", "github" */
+  provider: string | null;
+  /** true after opening a password-reset link: the account page asks for a new password */
+  recovery: boolean;
+  /** each returns an error message, or null on success */
   signIn: (email: string) => Promise<string | null>;
+  signInPassword: (email: string, password: string) => Promise<string | null>;
+  /** null = signed in straight away; "confirm" = Supabase sent a confirmation email */
+  signUp: (email: string, password: string) => Promise<{ error: string | null; confirm: boolean }>;
+  signInOAuth: (provider: OAuthProvider) => Promise<string | null>;
+  resetPassword: (email: string) => Promise<string | null>;
+  updatePassword: (password: string) => Promise<string | null>;
   signOut: () => Promise<void>;
 };
 
+const NOT_SET = "Sync is not configured";
+
 const SyncCtx = createContext<Ctx>({
   status: "off", email: null, error: null, lastSynced: null,
-  syncNow: async () => {}, signIn: async () => "Sync not configured", signOut: async () => {},
+  provider: null, recovery: false, syncNow: async () => {},
+  signIn: async () => NOT_SET, signInPassword: async () => NOT_SET, signUp: async () => ({ error: NOT_SET, confirm: false }),
+  signInOAuth: async () => NOT_SET, resetPassword: async () => NOT_SET, updatePassword: async () => NOT_SET, signOut: async () => {},
 });
+const back = () => `${window.location.origin}/account`;
 export const useSync = () => useContext(SyncCtx);
 
 export function SyncProvider({ children }: { children: React.ReactNode }) {
@@ -27,6 +44,8 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   const app = useAppState();
   const [uid, setUid] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
+  const [provider, setProvider] = useState<string | null>(null);
+  const [recovery, setRecovery] = useState(false);
   const [status, setStatus] = useState<Status>(syncConfigured ? "signed-out" : "off");
   const [error, setError] = useState<string | null>(null);
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
@@ -36,15 +55,16 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   // auth session
   useEffect(() => {
     if (!sb) return;
-    sb.auth.getSession().then(({ data }) => {
-      setUid(data.session?.user.id ?? null);
-      setEmail(data.session?.user.email ?? null);
-      if (!data.session) setStatus("signed-out");
-    });
-    const { data: sub } = sb.auth.onAuthStateChange((_e, session) => {
+    const apply = (session: Session | null) => {
       setUid(session?.user.id ?? null);
       setEmail(session?.user.email ?? null);
-      if (!session) setStatus("signed-out");
+      setProvider((session?.user.app_metadata?.provider as string | undefined) ?? null);
+      if (!session) { setStatus("signed-out"); setRecovery(false); }
+    };
+    sb.auth.getSession().then(({ data }) => apply(data.session));
+    const { data: sub } = sb.auth.onAuthStateChange((event, session) => {
+      apply(session);
+      if (event === "PASSWORD_RECOVERY") setRecovery(true);
     });
     return () => sub.subscription.unsubscribe();
   }, [sb]);
@@ -98,14 +118,46 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   }, [uid, sync]);
 
   const signIn = useCallback(async (addr: string) => {
-    if (!sb) return "Sync is not configured";
-    const { error: e } = await sb.auth.signInWithOtp({ email: addr, options: { emailRedirectTo: `${window.location.origin}/account` } });
+    if (!sb) return NOT_SET;
+    const { error: e } = await sb.auth.signInWithOtp({ email: addr, options: { emailRedirectTo: back() } });
+    return e ? e.message : null;
+  }, [sb]);
+  const signInPassword = useCallback(async (addr: string, password: string) => {
+    if (!sb) return NOT_SET;
+    const { error: e } = await sb.auth.signInWithPassword({ email: addr, password });
+    return e ? e.message : null;
+  }, [sb]);
+  const signUp = useCallback(async (addr: string, password: string) => {
+    if (!sb) return { error: NOT_SET, confirm: false };
+    const { data, error: e } = await sb.auth.signUp({ email: addr, password, options: { emailRedirectTo: back() } });
+    if (e) return { error: e.message, confirm: false };
+    // Supabase answers an already-registered address with a user that has no identities (to avoid leaking accounts)
+    if (data.user && !data.user.identities?.length) return { error: "That email already has an account – sign in instead.", confirm: false };
+    return { error: null, confirm: !data.session };
+  }, [sb]);
+  const signInOAuth = useCallback(async (p: OAuthProvider) => {
+    if (!sb) return NOT_SET;
+    const { error: e } = await sb.auth.signInWithOAuth({ provider: p, options: { redirectTo: back() } });
+    return e ? e.message : null;
+  }, [sb]);
+  const resetPassword = useCallback(async (addr: string) => {
+    if (!sb) return NOT_SET;
+    const { error: e } = await sb.auth.resetPasswordForEmail(addr, { redirectTo: back() });
+    return e ? e.message : null;
+  }, [sb]);
+  const updatePassword = useCallback(async (password: string) => {
+    if (!sb) return NOT_SET;
+    const { error: e } = await sb.auth.updateUser({ password });
+    if (!e) setRecovery(false);
     return e ? e.message : null;
   }, [sb]);
   const signOut = useCallback(async () => { await sb?.auth.signOut(); }, [sb]);
 
   return (
-    <SyncCtx.Provider value={{ status, email, error, lastSynced, syncNow: sync, signIn, signOut }}>
+    <SyncCtx.Provider value={{
+      status, email, error, lastSynced, provider, recovery, syncNow: sync,
+      signIn, signInPassword, signUp, signInOAuth, resetPassword, updatePassword, signOut,
+    }}>
       {children}
     </SyncCtx.Provider>
   );

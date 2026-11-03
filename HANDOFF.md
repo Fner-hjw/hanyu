@@ -5,6 +5,7 @@ Read this first in a new session. It records where the project stands, how it's 
 ## Status (2026-11-03)
 - Repo: https://github.com/Fner-hjw/hanyu, branch `main`, last commit `0deb0cc`.
 - Phases 0–6 in `ROADMAP.md` are done. Phase 7 is next (see below).
+- Phase 7a (done): account and navigation rework. Supabase is set up by the owner. Sign-in supports email + password (no email needed when "Confirm email" is off), GitHub/Google OAuth (buttons appear only when enabled; read from `/auth/v1/settings` via `getAuthSettings()`), email link, and password reset. Backup/restore moved from Today to `/account`. The sidebar has 4 groups (Study, Practice [collapsible], Tools, You) with the account chip at the top.
 - Owner: an English speaker around HSK 4 who works in finance. Goals: speak more fluently and build workplace vocabulary. Prefers simplified characters and pinyin, free hosting (GitHub + Vercel + Supabase), and the best free audio.
 - Working agreement from the owner: Opus owns architecture, core features and review. Lower-level tasks (content writing, pattern-following pages, QA sweeps) go to Sonnet or Haiku subagents, and Opus reviews everything before committing. Work in phases; each phase ends with a green build, lint, browser smoke test and a commit + push.
 
@@ -17,7 +18,7 @@ Read this first in a new session. It records where the project stands, how it's 
   - `useSearchParams` needs a `<Suspense>` boundary.
   - Lint rules are strict: no synchronous `setState` in effect bodies (defer with `setTimeout`), no impure calls in render.
   - `next typegen` regenerates route types after adding routes.
-- Design system: tokens and component classes in `src/app/globals.css` (`card`, `btn`, `btn-primary`, `chip[data-active]`, `opt[data-state]`, `input`, `eyebrow`, `hanzi`/`han`). Primitives live in `src/components/ui.tsx`. The app shell (sidebar + mobile tabs) is in `src/components/Shell.tsx`. Navigation is in `src/lib/nav.ts`, where items with `ready: false` stay hidden.
+- Design system: tokens and component classes in `src/app/globals.css` (`card`, `btn`, `btn-primary`, `chip[data-active]`, `opt[data-state]`, `input`, `eyebrow`, `hanzi`/`han`). Primitives live in `src/components/ui.tsx`. The app shell (sidebar + mobile tabs) is in `src/components/Shell.tsx`. Navigation is in `src/lib/nav.ts` (groups `Study | Practice | Tools | You`), where items with `ready: false` stay hidden. `Hub` takes a list of groups.
 
 ## Architecture map
 - **State:** `src/lib/store.ts` holds a single local-first store in localStorage (`hanyu:v1`) with cards, log, known, notes, mistakes, bank, writing, grammarDone, dialoguesDone, readingsDone, tests and settings. It syncs across tabs. `src/lib/merge.ts` is a commutative merge used by Supabase sync (`src/components/SyncProvider.tsx`, schema in `supabase/schema.sql`). A new state field must be added to `DEFAULT_STATE`, `normalize()`, `mergeStates()`, `fingerprint()` and `scripts/test-merge.mts`.
@@ -81,7 +82,7 @@ Browser-test tips from this project:
 - Speech scoring was only tested with a simulated recognizer. Real scoring needs Chrome, Edge or Safari.
 - Recorded audio comes from GitHub raw and stroke data from jsDelivr, with unpkg as the fallback. There is no offline support yet.
 - Content written with AI help was reviewed by Opus but not by a native speaker.
-- Supabase sync still needs the owner's project keys (steps on `/account`).
+- Without an SMTP server, Supabase's built-in mailer only reaches project team members and is rate-limited, so email links and password resets are for the owner only. Password sign-up works for anyone if "Confirm email" is off.
 - The empty clone at `/home/user/hanyu-github` in the old container can be ignored.
 
 ## Phase 7 (next): suggested order

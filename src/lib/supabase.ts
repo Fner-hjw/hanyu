@@ -15,3 +15,33 @@ export function getSupabase(): SupabaseClient | null {
 }
 
 export const syncConfigured = Boolean(url && key);
+
+export type OAuthProvider = "google" | "github";
+export type AuthSettings = {
+  /** which sign-in methods are switched on in the Supabase dashboard */
+  google: boolean;
+  github: boolean;
+  email: boolean;
+  /** "Confirm email" is off: new password accounts work immediately, no email sent */
+  autoconfirm: boolean;
+  signupDisabled: boolean;
+};
+
+/** Reads the project's public auth settings so the UI only offers methods that are enabled. */
+export async function getAuthSettings(): Promise<AuthSettings | null> {
+  if (!url || !key) return null;
+  try {
+    const r = await fetch(`${url}/auth/v1/settings`, { headers: { apikey: key } });
+    if (!r.ok) return null;
+    const j = (await r.json()) as { external?: Record<string, boolean>; mailer_autoconfirm?: boolean; disable_signup?: boolean };
+    return {
+      google: !!j.external?.google,
+      github: !!j.external?.github,
+      email: j.external?.email !== false,
+      autoconfirm: !!j.mailer_autoconfirm,
+      signupDisabled: !!j.disable_signup,
+    };
+  } catch {
+    return null;
+  }
+}

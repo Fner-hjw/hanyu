@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
 import { ArrowRight, Flame, Layers, Sparkles, Target, Trophy } from "lucide-react";
 import { Badge, PageHeader, Progress, Ring, Stat } from "@/components/ui";
 import { HSK_LEVELS, LEVEL_SIZES, levelLabel, levelOfId, BIZ_WORDS } from "@/lib/data";
 import { visibleNav } from "@/lib/nav";
-import { dueCount, exportData, importData, isKnown, resetData, streak, todayKey, updateSettings, useAppState, useHydrated } from "@/lib/store";
+import { dueCount, isKnown, streak, todayKey, updateSettings, useAppState, useHydrated } from "@/lib/store";
 
 export default function Home() {
   const hydrated = useHydrated();
@@ -20,7 +19,6 @@ function greeting() {
 
 function Today() {
   const s = useAppState();
-  const fileRef = useRef<HTMLInputElement>(null);
   const ids = Object.keys(s.cards);
   const due = dueCount(s);
   const log = s.log[todayKey()];
@@ -147,21 +145,9 @@ function Today() {
             </select>
           </label>
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <button className="btn btn-sm" onClick={() => {
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(new Blob([exportData()], { type: "application/json" }));
-            a.download = `hanyu-backup-${todayKey()}.json`;
-            a.click();
-          }}>Export progress</button>
-          <button className="btn btn-sm" onClick={() => fileRef.current?.click()}>Import progress</button>
-          <input ref={fileRef} type="file" accept="application/json" hidden onChange={async (e) => {
-            const f = e.target.files?.[0];
-            if (f) { try { importData(await f.text()); } catch { alert("Invalid backup file"); } }
-          }} />
-          <button className="btn btn-sm text-accent" onClick={() => confirm("Delete all progress?") && resetData()}>Reset</button>
-        </div>
-        <p className="mt-2 text-xs text-muted">Progress is stored in this browser. Sign in under Account to sync across devices.</p>
+        <p className="mt-4 text-sm text-muted">
+          Backup, restore and cross-device sync are under <Link href="/account" className="font-semibold text-accent">Account</Link>.
+        </p>
       </details>
     </div>
   );
