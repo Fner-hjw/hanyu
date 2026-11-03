@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { tokenize } from "@/lib/text";
 import { SpeakButton } from "./Speak";
 import { lookupWithFallback, refineTokens } from "@/lib/dict";
+import { BookmarkCheck, BookmarkPlus } from "lucide-react";
+import { addToBank, removeFromBank, useAppState } from "@/lib/store";
 
 /** Chinese text with ruby pinyin and tap-a-word glosses. */
 export function Annotated({
@@ -32,6 +34,7 @@ export function Annotated({
     };
   }, [base, text]);
   const t = sel !== null ? tokens[sel] : null;
+  const bank = useAppState().bank;
   const [dict, setDict] = useState<{ word: string; entries: [string, string][] }[] | null>(null);
 
   useEffect(() => {
@@ -66,9 +69,9 @@ export function Annotated({
         )}
       </p>
       {t && (
-        <div className="mt-2 flex items-center gap-3 rounded-lg border border-line bg-card px-3 py-2 text-sm">
+        <div className="mt-2 flex items-start gap-3 rounded-lg border border-line bg-card px-3 py-2 text-sm">
           <SpeakButton text={t.text} rate={0.8} />
-          <div>
+          <div className="min-w-0 flex-1">
             <span className="han text-lg">{t.text}</span>
             {t.word && <span className="text-accent"> {t.py}</span>}
             {t.word ? (
@@ -88,6 +91,18 @@ export function Annotated({
               ))
             )}
           </div>
+          {!t.word && (() => {
+            const id = `bank:${t.text}`;
+            const saved = !!bank[id];
+            const en = dict?.find((d) => d.word === t.text)?.entries[0]?.[1] ?? dict?.map((d) => `${d.word}: ${d.entries[0]?.[1] ?? ""}`).join(" · ") ?? "";
+            return (
+              <button type="button" className={`btn btn-sm shrink-0 ${saved ? "text-good" : ""}`} disabled={!saved && dict === null}
+                onClick={() => (saved ? removeFromBank(id) : addToBank(id, { zh: t.text, py: t.py, en }))}
+                aria-label={saved ? "Remove from my words" : "Save to my words"}>
+                {saved ? <BookmarkCheck size={14} /> : <BookmarkPlus size={14} />} {saved ? "Saved" : "Save"}
+              </button>
+            );
+          })()}
         </div>
       )}
     </div>

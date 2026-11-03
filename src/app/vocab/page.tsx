@@ -4,12 +4,13 @@ import { useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { BIZ_WORDS, HSK_LEVELS, levelLabel, loadLevel, loadLevels, useAsync, type Word } from "@/lib/data";
 import { parsePinyin } from "@/lib/pinyin";
+import { bankWord } from "@/lib/resolve";
 import { addCards, useAppState, useHydrated } from "@/lib/store";
 import { PageHeader } from "@/components/ui";
 import { SpeakButton } from "@/components/Speak";
 import { StatusBadge, WordSheet, wordStatus } from "@/components/WordSheet";
 
-type Source = number | "biz" | "all";
+type Source = number | "biz" | "all" | "bank";
 const PAGE = 60;
 
 function matcher(q: string) {
@@ -38,8 +39,10 @@ function Browser() {
   const [open, setOpen] = useState<Word | null>(null);
 
   const data = useAsync<Word[]>(
-    () => (source === "biz" ? Promise.resolve(BIZ_WORDS) : source === "all" ? loadLevels([...HSK_LEVELS]) : loadLevel(source)),
-    [source],
+    () => (source === "biz" ? Promise.resolve(BIZ_WORDS)
+      : source === "bank" ? Promise.resolve(Object.entries(s.bank).map(([id, b]) => bankWord(id, b)))
+      : source === "all" ? loadLevels([...HSK_LEVELS]) : loadLevel(source)),
+    [source, source === "bank" ? Object.keys(s.bank).length : 0],
   );
   const posList = useMemo(() => [...new Set((data.data ?? []).flatMap((w) => w.pos))].sort(), [data.data]);
   const filtered = useMemo(() => {
@@ -66,6 +69,7 @@ function Browser() {
           {HSK_LEVELS.map((l) => chip(l, levelLabel(l)))}
           {chip("biz", "Business")}
           {chip("all", "All HSK")}
+          {chip("bank", `My words (${Object.keys(s.bank).length})`)}
         </div>
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <select className="input w-auto py-1.5" value={status} onChange={(e) => setStatus(e.target.value as typeof status)} aria-label="Status filter">

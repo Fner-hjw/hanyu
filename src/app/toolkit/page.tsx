@@ -1,17 +1,19 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { Check, Copy, Handshake, Mail, MessageSquare, Ruler, Search } from "lucide-react";
+import { Calculator, Check, Copy, Handshake, Mail, MessageSquare, Ruler, Search } from "lucide-react";
+import { NumbersTrainer } from "./NumbersTrainer";
 import { ETIQUETTE, EMAILS, MEASURE_WORDS, PHRASES } from "@/data/toolkit";
 import { Annotated } from "@/components/Annotated";
 import { SpeakButton } from "@/components/Speak";
 import { Badge, Empty, PageHeader } from "@/components/ui";
 
-type Tab = "emails" | "phrases" | "measure" | "etiquette";
+type Tab = "emails" | "phrases" | "numbers" | "measure" | "etiquette";
 
 const TABS: { id: Tab; label: string; icon: ReactNode }[] = [
   { id: "emails", label: "Emails", icon: <Mail size={15} /> },
   { id: "phrases", label: "Phrases", icon: <MessageSquare size={15} /> },
+  { id: "numbers", label: "Numbers & money", icon: <Calculator size={15} /> },
   { id: "measure", label: "Measure words", icon: <Ruler size={15} /> },
   { id: "etiquette", label: "Etiquette", icon: <Handshake size={15} /> },
 ];
@@ -22,7 +24,7 @@ export default function ToolkitPage() {
     <div>
       <PageHeader
         title="Work toolkit"
-        subtitle="Email templates, ready-made phrases, measure words and etiquette tips for using Chinese at work."
+        subtitle="Email templates, ready-made phrases, a numbers & money trainer, measure words and etiquette tips for using Chinese at work."
       />
       <div className="noscroll -mx-1 mb-5 flex gap-2 overflow-x-auto px-1" role="group" aria-label="Toolkit sections">
         {TABS.map((t) => (
@@ -34,6 +36,7 @@ export default function ToolkitPage() {
       </div>
       {tab === "emails" && <EmailsTab />}
       {tab === "phrases" && <PhrasesTab />}
+      {tab === "numbers" && <NumbersTrainer />}
       {tab === "measure" && <MeasureTab />}
       {tab === "etiquette" && <EtiquetteTab />}
     </div>

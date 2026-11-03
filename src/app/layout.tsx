@@ -6,6 +6,8 @@ import { SyncProvider } from "@/components/SyncProvider";
 export const metadata: Metadata = {
   title: "Hànyǔ – Chinese for life & work",
   description: "A complete Chinese learning platform: HSK 1–9 vocabulary, flashcards, listening, speaking, writing, grammar and tests.",
+  icons: { icon: "/icon-192.png", apple: "/apple-icon.png" },
+  appleWebApp: { capable: true, title: "Hànyǔ", statusBarStyle: "default" },
 };
 export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#c4352b" };
 

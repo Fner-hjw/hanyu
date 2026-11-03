@@ -7,11 +7,13 @@ a guided path and progress tracking.
 | Phase | Scope | Status |
 |---|---|---|
 | 0 | MVP: flashcards, 6 dialogues, 12 grammar points, reader, level test, optional Supabase sync | done |
-| 1 | Foundation: new design system + app shell; data pipeline for HSK 3.1 words (11,000), 4,354 graded sentences with audio, characters | in progress |
-| 2 | Learn path (levels → units), vocabulary browser, flashcards v2 (decks, typing/listening/cloze modes) | |
-| 3 | Listening (real audio, dictation), speaking (speech recognition, shadowing), pronunciation (pinyin chart, tone drills) | |
-| 4 | Characters & writing (stroke order, handwriting quiz, radicals), graded reading, ~50 grammar points | |
-| 5 | 20+ dialogues, business toolkit (emails, numbers/money, measure words), generated mock exams, stats, final QA | |
+| 1 | Foundation: design system + app shell; data pipeline (11k HSK words, 4,354 sentences with audio, characters) | done |
+| 2 | Learn path (levels → units), vocabulary browser, flashcards v2 | done |
+| 3 | Listening, speaking (speech recognition), pronunciation; toolkit and reading library | done |
+| 4 | Handwriting trainer + radicals, 61 grammar points, 21 dialogues with role-play | done |
+| 5 | Adaptive placement + generated mock exams, numbers & money trainer, progress & study plan | done |
+| 6 | Mistakes notebook, personal word bank, games, installable app (PWA) | done |
+| 7 (next) | Offline mode (service worker), native-speaker content review, AI conversation partner, more readings/dialogues, HSKK speaking test, writing (sentence composition) practice | planned |
 
 Each phase ends with a green build, lint, browser smoke test and a commit.
 

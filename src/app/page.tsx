@@ -57,7 +57,8 @@ function Today() {
             <p className="text-sm text-muted">Reviews and practice both count toward your streak.</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Link href="/flashcards" className="btn btn-primary"><Layers size={16} /> {due > 0 ? "Review now" : "Learn new words"}</Link>
-              <Link href="/dialogues" className="btn">Practise a dialogue</Link>
+              <Link href="/learn" className="btn">Continue the path</Link>
+              {Object.keys(s.mistakes).length > 0 && <Link href="/mistakes" className="btn">{Object.keys(s.mistakes).length} mistakes to revisit</Link>}
             </div>
           </div>
         </div>
@@ -120,7 +121,7 @@ function Today() {
             )}
           </div>
           <div className="card p-5">
-            <h2 className="mb-3 font-semibold">Progress</h2>
+            <div className="mb-3 flex items-center justify-between"><h2 className="font-semibold">Progress</h2><Link href="/stats" className="flex items-center gap-1 text-sm text-accent">Details <ArrowRight size={14} /></Link></div>
             <div className="flex flex-wrap gap-2 text-sm">
               <Badge tone="good">{Object.keys(s.dialoguesDone).length} dialogues</Badge>
               <Badge tone="sky">{Object.keys(s.grammarDone).length} grammar points</Badge>

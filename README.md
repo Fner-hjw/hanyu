@@ -1,45 +1,52 @@
-# 汉语 – Chinese for work
+# 汉语 Hànyǔ – Chinese for life & work
 
-Local-first learning platform (Next.js 16, TypeScript, Tailwind, FSRS spaced repetition).
+A complete, free Chinese learning platform (Next.js 16 · TypeScript · Tailwind v4 · FSRS spaced repetition).
+Works offline-first in the browser; optional Supabase sync across devices; installable on your phone.
+
+## What's inside
+| Area | Features |
+|---|---|
+| **Today** | Daily goal ring, streak, due cards, level progress, shortcuts to mistakes and the path |
+| **Path** | HSK 1–9 split into 20-word units: words, real sentences in context (recorded audio), quick quiz, unit flashcards |
+| **Review** | FSRS flashcards over any deck (HSK levels, units, business topics, all due, mistakes, my words); recognise / recall / listen / type-pinyin / cloze modes; keyboard shortcuts |
+| **Vocabulary** | 10,958 HSK 3.1 words + 363 hand-written business & finance words; tone-insensitive search; word sheet with examples, characters, CC-CEDICT senses, notes |
+| **Listen** | 4,354 graded sentences with real recordings (normal/slow); meaning quiz; dictation in 汉字 or pinyin with per-character feedback |
+| **Speak** | Speech-recognition scoring (homophone-tolerant), read-aloud, shadowing, English→Chinese; record & compare your voice |
+| **Pronounce** | Tone contours, tone trainer (single & pairs), pinyin explorer, minimal pairs (zh/z, sh/s, n/l, an/ang…) |
+| **Write** | Stroke order animation, tracing and writing from memory on a 米字格; 100 radicals |
+| **Read** | 24 graded texts (HSK 2–6, 12 workplace/finance) with comprehension; paste-any-text reader with tap-a-word glosses and save-to-my-words |
+| **Dialogues** | 21 dialogues (daily life + work) with play-all, role-play where you speak your lines, quiz |
+| **Grammar** | 61 patterns HSK 1–6 with pitfalls, examples and drills |
+| **Games** | Match pairs, sentence builder, 60-second speed round |
+| **Tests** | Adaptive placement and generated HSK-style mock exams (listening, vocabulary, grammar, cloze, reading) |
+| **Work toolkit** | 12 email templates, 127 phrases in 10 situations, numbers & money trainer (万/亿), 40 measure words, etiquette |
+| **Mistakes / Progress** | Everything you got wrong in one place; heatmap, retention, skills, study plan for an exam date |
 
 ## Run
 ```bash
 npm install
 npm run dev     # http://localhost:3000
-npm run build   # production build
+npm run build
 ```
 
 ## Deploy (free)
-1. Push to GitHub.
-2. vercel.com → Add New Project → import the repo → Deploy (no config needed).
+Push to GitHub → import the repo on vercel.com → Deploy. For cross-device sync follow the steps on the app's **/account** page (Supabase, free tier).
 
-## Where things live
-| What | Where |
-|---|---|
-| Vocabulary (363 words, 13 topics) | `src/data/vocab.ts` (core) and `src/data/vocab-pack.ts` (finance/business pack) – one row per word |
-| Dialogues + comprehension quizzes | `src/data/dialogues.ts` |
-| Grammar points + exercises | `src/data/grammar.ts` |
-| Level-check questions (28) | `src/data/test.ts` |
-| Spaced repetition + progress storage | `src/lib/store.ts` |
-| Browser text-to-speech | `src/lib/audio.ts` |
-| Dictionary lookup (CC-CEDICT, sharded) | `public/dict/`, `src/lib/dict.ts`, built by `scripts/build-dict.mjs` |
-| Cloud sync (optional) | `src/components/SyncProvider.tsx`, `src/lib/merge.ts`, `supabase/schema.sql` |
+## Data & licences
+| Data | Source | Licence |
+|---|---|---|
+| HSK 3.1 word list | `hsk3.1-syllabus` | MIT |
+| Meanings, dictionary | CC-CEDICT (MDBG) | CC BY-SA 4.0 |
+| Graded sentences & audio | no7z/hsk-sentences-audio | CC BY-SA 4.0 |
+| Character decomposition | Wikimedia Commons CCD | — |
+| Stroke data (runtime) | hanzi-writer-data | Arphic PL |
 
-## Cloud sync (optional, free)
-Works without it (progress stays in the browser). To enable cross-device sync, follow the steps on the app's **/account** page: create a Supabase project, run `supabase/schema.sql`, set the redirect URL, and add `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Vercel (see `.env.example`). Sign-in is by email link; progress is merged (newest review wins per card), never overwritten.
+Derived files in `public/data` and `public/dict` are shared under CC BY-SA 4.0. Regenerate with `scripts/build-data.mjs` / `scripts/build-dict.mjs`.
 
-## Checks
+## Content & quality checks
 ```bash
-npx tsx scripts/check-vocab.mts   # duplicates + pinyin cross-check against pinyin-pro and CC-CEDICT
-npx tsx scripts/test-merge.mts    # sync merge logic
+npx tsx scripts/check-content.mts <ccd.json>   # structure, punctuation, pinyin vs CC-CEDICT, radicals
+npx tsx scripts/check-vocab.mts                 # business-pack pinyin
+for t in pinyin merge compare syllables shuffle numbers exam; do npx tsx scripts/test-$t.mts; done
 ```
-
-## Notes
-- Dictionary data: CC-CEDICT © MDBG, CC BY-SA 4.0 (https://cc-cedict.org); the derived files in `public/dict/` are shared under the same license.
-- Progress is stored in `localStorage`; use Export/Import on the home page to back up or move devices.
-- HSK levels on words are approximate – check against the official HSK list.
-- Audio uses the browser's Chinese voice (best on Chrome/Edge/Safari).
-- All content was AI-drafted; have a native speaker review it.
-
-## Next steps
-Larger HSK-aligned vocabulary packs, pre-generated neural audio, a speaking/roleplay mode (AI tutor), more dialogues and grammar.
+Hand-written content (grammar, dialogues, readings, toolkit, business words) was drafted with AI assistance and reviewed; a native-speaker pass is still recommended.
