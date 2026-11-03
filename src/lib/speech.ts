@@ -29,47 +29,111 @@ const ERRORS: Record<string, string> = {
   network: "Speech recognition needs an internet connection.",
 };
 
-/** Mandarin speech recognition. `alternatives` holds the recogniser's top guesses for the final result. */
+/** Chinese characters only, for measuring how much of a sentence has been said. */
+const hanzi = (t: string) => t.replace(/[^\u3400-\u9fff]/g, "");
+
+/**
+ * Joins final segments. Some recognisers (Chrome on Android) repeat everything heard so far in
+ * each new segment; then the new one replaces the old instead of doubling it.
+ */
+function join(prev: string, next: string): string {
+  const a = hanzi(prev), b = hanzi(next);
+  if (a && b.startsWith(a)) return next;
+  if (b && a.endsWith(b)) return prev;
+  return prev + next;
+}
+
+/** how long to wait for the learner to start talking, and the longest a single answer may run */
+const START_MS = 8000;
+const MAX_MS = 45000;
+
+type StartOpts = {
+  /** keep listening through any pause until stop() (long spoken answers) */
+  continuous?: boolean;
+  /** the sentence being repeated: once all of it has been heard, finish after a short pause */
+  target?: string;
+};
+
+/**
+ * Mandarin speech recognition. `alternatives` holds the recogniser's top guesses for the whole answer.
+ *
+ * By default it listens through short pauses (learners pause mid-sentence) and finishes after a
+ * silence: shorter once the whole `target` has been heard, longer while words are still missing.
+ */
 export function useRecognizer() {
   const rec = useRef<Recognition | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [listening, setListening] = useState(false);
   const [interim, setInterim] = useState("");
   const [alternatives, setAlternatives] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => () => rec.current?.abort(), []);
+  const clearTimer = () => { if (timer.current) clearTimeout(timer.current); timer.current = null; };
+  useEffect(() => () => { clearTimer(); rec.current?.abort(); }, []);
 
-  /** `continuous` keeps listening through pauses (for longer spoken answers) until stop() */
-  const start = useCallback((opts?: { continuous?: boolean }) => {
+  const start = useCallback((opts?: StartOpts) => {
     const Ctor = getCtor();
     if (!Ctor) { setError("Speech recognition isn't supported in this browser. Try Chrome, Edge or Safari."); return; }
+    clearTimer();
     rec.current?.abort();
     const r = new Ctor();
     r.lang = "zh-CN";
     r.interimResults = true;
     r.maxAlternatives = 3;
-    r.continuous = !!opts?.continuous;
+    // always continuous: the one-phrase mode ends at the first pause, cutting the sentence short
+    r.continuous = true;
     setInterim(""); setAlternatives([]); setError(null);
+
+    const want = hanzi(opts?.target ?? "").length;
+    let finals: string[] = [];
+    let pending = "";
+    let heard = false;
+    const began = Date.now();
+    const finish = () => { clearTimer(); if (rec.current === r) r.stop(); };
+    // wait for more speech; the wait depends on whether the answer looks complete
+    const arm = () => {
+      if (opts?.continuous) return;
+      clearTimer();
+      const said = hanzi((finals[0] ?? "") + pending).length;
+      const wait = !heard ? START_MS : want && said >= want ? 900 : want ? 2500 : 1800;
+      timer.current = setTimeout(finish, Math.min(wait, Math.max(0, MAX_MS - (Date.now() - began))));
+    };
+
     r.onresult = (e) => {
-      let text = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
+      const next: string[] = [];
+      let open = "";
+      for (let i = 0; i < e.results.length; i++) {
         const res = e.results[i];
-        text += res[0].transcript;
         if (res.isFinal) {
-          const alts: string[] = [];
-          for (let k = 0; k < res.length; k++) alts.push(res[k].transcript);
-          setAlternatives((prev) => (prev.length ? prev.map((p, k) => p + (alts[k] ?? alts[0])) : alts));
-        }
+          const before = [...next];
+          for (let k = 0; k < Math.max(res.length, before.length, 1); k++) {
+            const seg = (res[k] ?? res[0]).transcript;
+            const prev = before[k] ?? before[0];
+            next[k] = prev === undefined ? seg : join(prev, seg);
+          }
+        } else open += res[0].transcript;
       }
-      setInterim(text);
+      finals = next;
+      pending = open;
+      if (hanzi((finals[0] ?? "") + open)) heard = true;
+      setAlternatives(finals);
+      setInterim((finals[0] ?? "") + open);
+      arm();
     };
     r.onerror = (e) => { if (e.error !== "aborted") setError(ERRORS[e.error] ?? `Recognition error: ${e.error}`); };
-    r.onend = () => setListening(false);
+    r.onend = () => {
+      clearTimer();
+      if (rec.current !== r) return;
+      // stopped before the last words were finalised: keep them rather than score half a sentence
+      if (pending) setAlternatives(finals.length ? finals.map((f) => join(f, pending)) : [pending]);
+      else if (!heard) setError((err) => err ?? ERRORS["no-speech"]);
+      setListening(false);
+    };
     rec.current = r;
-    try { r.start(); setListening(true); } catch { setError("Couldn't start the microphone."); }
+    try { r.start(); setListening(true); arm(); } catch { setError("Couldn't start the microphone."); }
   }, []);
 
-  const stop = useCallback(() => rec.current?.stop(), []);
+  const stop = useCallback(() => { clearTimer(); rec.current?.stop(); }, []);
   const reset = useCallback(() => { setInterim(""); setAlternatives([]); setError(null); }, []);
   return { listening, interim, alternatives, error, start, stop, reset };
 }
