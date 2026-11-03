@@ -15,7 +15,7 @@ export const NAV: NavItem[] = [
   { href: "/listen", label: "Listen", desc: "Real audio, dictation, comprehension", icon: Headphones, group: "Practice", ready: true },
   { href: "/speak", label: "Speak", desc: "Shadowing and pronunciation scoring", icon: Mic, group: "Practice", ready: true },
   { href: "/pronounce", label: "Pronounce", desc: "Pinyin chart and tone drills", icon: AudioLines, group: "Practice", ready: true },
-  { href: "/write", label: "Write", desc: "Stroke order and handwriting", icon: PenLine, group: "Practice", ready: false },
+  { href: "/write", label: "Write", desc: "Stroke order and handwriting", icon: PenLine, group: "Practice", ready: true },
   { href: "/reader", label: "Read", desc: "Graded texts and tap-a-word reader", icon: BookOpen, group: "Practice", ready: true },
   { href: "/dialogues", label: "Dialogues", desc: "Everyday and workplace conversations", icon: MessagesSquare, group: "Practice", ready: true },
   { href: "/grammar", label: "Grammar", desc: "Patterns with examples and drills", icon: Puzzle, group: "Practice", ready: true },

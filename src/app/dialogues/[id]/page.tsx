@@ -1,8 +1,8 @@
-import { DIALOGUES } from "@/data/dialogues";
+import { ALL_DIALOGUES } from "@/data/dialogues-all";
 import DialogueClient from "./DialogueClient";
 
 export function generateStaticParams() {
-  return DIALOGUES.map((d) => ({ id: d.id }));
+  return ALL_DIALOGUES.map((d) => ({ id: d.id }));
 }
 
 export default async function Page({ params }: PageProps<"/dialogues/[id]">) {
