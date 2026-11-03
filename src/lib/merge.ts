@@ -21,7 +21,12 @@ export function mergeStates(a: AppState, b: AppState): AppState {
   for (const [day, l] of Object.entries(b.log)) {
     const x = log[day];
     log[day] = x
-      ? { reviews: Math.max(x.reviews, l.reviews), newCards: Math.max(x.newCards, l.newCards), correct: Math.max(x.correct, l.correct) }
+      ? {
+          reviews: Math.max(x.reviews, l.reviews),
+          newCards: Math.max(x.newCards, l.newCards),
+          correct: Math.max(x.correct, l.correct),
+          practice: Math.max(x.practice ?? 0, l.practice ?? 0),
+        }
       : l;
   }
 
@@ -32,11 +37,24 @@ export function mergeStates(a: AppState, b: AppState): AppState {
   for (const r of b.tests) if (!tests.some((x) => x.date === r.date)) tests.push(r);
   tests.sort((x, y) => t(x.date) - t(y.date));
 
+  const mistakes: AppState["mistakes"] = { ...a.mistakes };
+  for (const [k, m] of Object.entries(b.mistakes)) {
+    const x = mistakes[k];
+    mistakes[k] = x ? { ...(t(x.last) >= t(m.last) ? x : m), count: Math.max(x.count, m.count) } : m;
+  }
+  const writing: AppState["writing"] = { ...a.writing };
+  for (const [k, v] of Object.entries(b.writing)) writing[k] = Math.max(writing[k] ?? 0, v);
+
   // settings: prefer a's (the local device's) values – they're per-device preferences
   return {
     cards,
     log,
     grammarDone: { ...b.grammarDone, ...a.grammarDone },
+    known: { ...b.known, ...a.known },
+    notes: { ...b.notes, ...a.notes },
+    mistakes,
+    bank: { ...b.bank, ...a.bank },
+    writing,
     dialoguesDone,
     tests,
     settings: { ...b.settings, ...a.settings },
@@ -48,8 +66,13 @@ export function fingerprint(s: AppState): string {
   const sortObj = (o: Record<string, unknown>) => Object.fromEntries(Object.entries(o).sort(([x], [y]) => (x < y ? -1 : 1)));
   return JSON.stringify({
     cards: sortObj(s.cards),
-    log: sortObj(s.log),
+    log: sortObj(Object.fromEntries(Object.entries(s.log).map(([k, l]) => [k, { ...l, practice: l.practice ?? 0 }]))),
     grammarDone: sortObj(s.grammarDone),
+    known: sortObj(s.known),
+    notes: sortObj(s.notes),
+    mistakes: sortObj(s.mistakes),
+    bank: sortObj(s.bank),
+    writing: sortObj(s.writing),
     dialoguesDone: sortObj(s.dialoguesDone),
     tests: s.tests,
   });

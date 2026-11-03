@@ -2,122 +2,166 @@
 
 import Link from "next/link";
 import { useRef } from "react";
-import { VOCAB } from "@/data/vocab";
-import { DIALOGUES } from "@/data/dialogues";
-import { GRAMMAR } from "@/data/grammar";
-import {
-  buildQueue, exportData, importData, isKnown, resetData, streak, todayKey, updateSettings, useAppState, useHydrated,
-} from "@/lib/store";
-
-function Stat({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
-  return (
-    <div className="rounded-xl border border-line bg-card p-4">
-      <div className="text-3xl font-semibold">{value}</div>
-      <div className="text-sm text-muted">{label}</div>
-      {sub && <div className="mt-1 text-xs text-muted">{sub}</div>}
-    </div>
-  );
-}
+import { ArrowRight, Flame, Layers, Sparkles, Target, Trophy } from "lucide-react";
+import { Badge, PageHeader, Progress, Ring, Stat } from "@/components/ui";
+import { HSK_LEVELS, LEVEL_SIZES, levelLabel, levelOfId, BIZ_WORDS } from "@/lib/data";
+import { visibleNav } from "@/lib/nav";
+import { dueCount, exportData, importData, isKnown, resetData, streak, todayKey, updateSettings, useAppState, useHydrated } from "@/lib/store";
 
 export default function Home() {
   const hydrated = useHydrated();
-  return hydrated ? <Dashboard /> : null;
+  return hydrated ? <Today /> : null;
 }
 
-function Dashboard() {
-  const s = useAppState();
-  const hydrated = true;
-  const fileRef = useRef<HTMLInputElement>(null);
-  const q = buildQueue(s, VOCAB, { newLimit: s.settings.newPerDay });
-  const known = VOCAB.filter((w) => isKnown(s.cards[w.id])).length;
-  const learning = Object.keys(s.cards).length;
-  const today = s.log[todayKey()];
-  const last = s.tests[s.tests.length - 1];
-  const todo = q.due.length + q.fresh.length;
+function greeting() {
+  const h = new Date().getHours();
+  return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+}
 
-  const byLevel = [3, 4, 5, 6].map((l) => {
-    const ws = VOCAB.filter((w) => w.level === l);
-    return { l, total: ws.length, seen: ws.filter((w) => s.cards[w.id]).length };
+function Today() {
+  const s = useAppState();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const ids = Object.keys(s.cards);
+  const due = dueCount(s);
+  const log = s.log[todayKey()];
+  const done = (log?.reviews ?? 0) + (log?.practice ?? 0);
+  const goal = s.settings.dailyGoal;
+  const pct = Math.min(100, (done / goal) * 100);
+  const known = new Set([...ids.filter((id) => isKnown(s.cards[id])), ...Object.keys(s.known)]).size;
+  const last = s.tests[s.tests.length - 1];
+  const days = streak(s);
+
+  const perLevel = HSK_LEVELS.map((l) => {
+    const started = ids.filter((id) => levelOfId(id) === l).length;
+    const marked = Object.keys(s.known).filter((id) => levelOfId(id) === l && !s.cards[id]).length;
+    return { l, n: started + marked, total: LEVEL_SIZES[l] };
   });
+  const bizStarted = ids.filter((id) => id.startsWith("w")).length;
+  const practiceLinks = visibleNav().filter((n) => n.group === "Practice");
 
   return (
     <div className="space-y-8">
-      <section className="rounded-2xl border border-line bg-card p-6">
-        <h1 className="text-2xl font-semibold">
-          <span className="han">你好！</span> Ready to practise?
-        </h1>
-        <p className="mt-1 text-muted">
-          {hydrated && todo > 0
-            ? `${q.due.length} cards due and ${q.fresh.length} new today.`
-            : "Nothing due right now – nice work."}
-        </p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Link href="/flashcards" className="rounded-full bg-accent px-5 py-2 text-white">
-            Start flashcards
-          </Link>
-          <Link href="/dialogues" className="rounded-full border border-line px-5 py-2 hover:bg-accent-soft">
-            Practise a dialogue
-          </Link>
-        </div>
-      </section>
+      <PageHeader title={<>{greeting()} <span className="hanzi text-accent">你好</span></>} subtitle="A little every day beats a lot once a week. Here's your plan." />
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="Day streak" value={hydrated ? streak(s) : 0} />
-        <Stat label="Reviewed today" value={hydrated ? (today?.reviews ?? 0) : 0} />
-        <Stat label="Words started" value={learning} sub={`of ${VOCAB.length}`} />
-        <Stat label="Words known" value={known} sub="stable memory" />
-      </section>
-
-      <section className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border border-line bg-card p-4">
-          <h2 className="mb-3 font-medium">Vocabulary by level (approx. HSK)</h2>
-          {byLevel.map(({ l, total, seen }) => (
-            <div key={l} className="mb-2 text-sm">
-              <div className="flex justify-between"><span>HSK {l}</span><span className="text-muted">{seen}/{total}</span></div>
-              <div className="h-2 rounded bg-line"><div className="h-2 rounded bg-accent" style={{ width: `${total ? (seen / total) * 100 : 0}%` }} /></div>
+      <section className="grid gap-4 md:grid-cols-[1.4fr_1fr]">
+        <div className="card flex items-center gap-4 p-5 sm:gap-6">
+          <Ring value={pct} size={104} stroke={10}>
+            <span className="text-2xl font-bold">{done}</span>
+            <span className="text-[0.7rem] text-muted">of {goal} today</span>
+          </Ring>
+          <div className="flex-1">
+            <div className="eyebrow">Today&apos;s goal</div>
+            <p className="mt-1 text-lg font-semibold">
+              {pct >= 100 ? "Goal complete — wonderful! 太棒了" : due > 0 ? `${due} card${due === 1 ? "" : "s"} waiting for review` : "Start with a few new words"}
+            </p>
+            <p className="text-sm text-muted">Reviews and practice both count toward your streak.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Link href="/flashcards" className="btn btn-primary"><Layers size={16} /> {due > 0 ? "Review now" : "Learn new words"}</Link>
+              <Link href="/dialogues" className="btn">Practise a dialogue</Link>
             </div>
-          ))}
+          </div>
         </div>
-        <div className="rounded-xl border border-line bg-card p-4 text-sm">
-          <h2 className="mb-3 font-medium">Progress</h2>
-          <p>Dialogues completed: {Object.keys(s.dialoguesDone).length}/{DIALOGUES.length}</p>
-          <p>Grammar points studied: {Object.keys(s.grammarDone).length}/{GRAMMAR.length}</p>
-          <p className="mt-2">
-            Last level check:{" "}
-            {last ? <b>≈ HSK {last.estimated}</b> : <Link className="text-accent underline" href="/test">not taken yet</Link>}
-          </p>
+        <div className="grid grid-cols-2 gap-3">
+          <Stat label="Streak" value={days} sub={days === 1 ? "day" : "days"} icon={<Flame size={16} className={days ? "text-gold" : ""} />} />
+          <Stat label="Known" value={known} sub="words" icon={<Trophy size={16} />} />
+          <Stat label="Due" value={due} sub="cards" icon={<Target size={16} />} />
+          <Stat label="Started" value={ids.length} sub="words" icon={<Sparkles size={16} />} />
         </div>
       </section>
 
-      <section className="rounded-xl border border-line bg-card p-4 text-sm">
-        <h2 className="mb-2 font-medium">Settings & backup</h2>
-        <label className="flex items-center gap-2">
-          New cards per day:
-          <select
-            className="rounded border border-line bg-bg px-2 py-1"
-            value={s.settings.newPerDay}
-            onChange={(e) => updateSettings({ newPerDay: +e.target.value })}
-          >
-            {[5, 10, 15, 20, 30].map((n) => <option key={n}>{n}</option>)}
-          </select>
-        </label>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <button className="rounded border border-line px-3 py-1 hover:bg-accent-soft" onClick={() => {
-            const blob = new Blob([exportData()], { type: "application/json" });
+      {practiceLinks.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-lg font-semibold">Practise a skill</h2>
+          <div className="noscroll -mx-4 flex gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-4">
+            {practiceLinks.map(({ href, label, desc, icon: Icon }) => (
+              <Link key={href} href={href} className="card group min-w-[10.5rem] shrink-0 p-4 transition-transform hover:-translate-y-0.5 sm:min-w-0">
+                <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-accent-soft text-accent"><Icon size={20} /></span>
+                <div className="font-semibold">{label}</div>
+                <div className="mt-0.5 line-clamp-2 text-xs text-muted">{desc}</div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="grid gap-4 md:grid-cols-2">
+        <div className="card p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-semibold">Vocabulary by level</h2>
+            <Link href="/vocab" className="flex items-center gap-1 text-sm text-accent">Browse <ArrowRight size={14} /></Link>
+          </div>
+          <div className="space-y-3">
+            {perLevel.map(({ l, n, total }) => (
+              <div key={l}>
+                <div className="mb-1 flex justify-between text-sm"><span className="font-medium">{levelLabel(l)}</span><span className="text-muted">{n} / {total.toLocaleString()}</span></div>
+                <Progress value={(n / total) * 100} tone={l <= 2 ? "good" : l <= 4 ? "sky" : "accent"} />
+              </div>
+            ))}
+            <div>
+              <div className="mb-1 flex justify-between text-sm"><span className="font-medium">Business &amp; finance</span><span className="text-muted">{bizStarted} / {BIZ_WORDS.length}</span></div>
+              <Progress value={(bizStarted / BIZ_WORDS.length) * 100} tone="gold" />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="card p-5">
+            <h2 className="mb-3 font-semibold">Level check</h2>
+            {last ? (
+              <div className="flex items-center justify-between">
+                <div><div className="text-3xl font-bold text-accent">≈ HSK {last.estimated}</div><div className="text-xs text-muted">{new Date(last.date).toLocaleDateString()}</div></div>
+                <Link href="/test" className="btn btn-sm">Retake</Link>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm text-muted">Not sure where you stand? A 15-minute check estimates your HSK level.</p>
+                <Link href="/test" className="btn btn-sm btn-primary shrink-0">Start</Link>
+              </div>
+            )}
+          </div>
+          <div className="card p-5">
+            <h2 className="mb-3 font-semibold">Progress</h2>
+            <div className="flex flex-wrap gap-2 text-sm">
+              <Badge tone="good">{Object.keys(s.dialoguesDone).length} dialogues</Badge>
+              <Badge tone="sky">{Object.keys(s.grammarDone).length} grammar points</Badge>
+              <Badge tone="gold">{Object.keys(s.writing).length} characters written</Badge>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <details className="card p-5 text-sm">
+        <summary className="cursor-pointer font-semibold">Settings &amp; backup</summary>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="eyebrow">New cards per day</span>
+            <select className="input mt-1" value={s.settings.newPerDay} onChange={(e) => updateSettings({ newPerDay: +e.target.value })}>
+              {[5, 10, 15, 20, 30, 50].map((n) => <option key={n}>{n}</option>)}
+            </select>
+          </label>
+          <label className="block">
+            <span className="eyebrow">Daily goal (reviews + practice)</span>
+            <select className="input mt-1" value={s.settings.dailyGoal} onChange={(e) => updateSettings({ dailyGoal: +e.target.value })}>
+              {[10, 20, 30, 50, 80, 120].map((n) => <option key={n}>{n}</option>)}
+            </select>
+          </label>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button className="btn btn-sm" onClick={() => {
             const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
+            a.href = URL.createObjectURL(new Blob([exportData()], { type: "application/json" }));
             a.download = `hanyu-backup-${todayKey()}.json`;
             a.click();
           }}>Export progress</button>
-          <button className="rounded border border-line px-3 py-1 hover:bg-accent-soft" onClick={() => fileRef.current?.click()}>Import progress</button>
+          <button className="btn btn-sm" onClick={() => fileRef.current?.click()}>Import progress</button>
           <input ref={fileRef} type="file" accept="application/json" hidden onChange={async (e) => {
             const f = e.target.files?.[0];
             if (f) { try { importData(await f.text()); } catch { alert("Invalid backup file"); } }
           }} />
-          <button className="rounded border border-line px-3 py-1 text-accent hover:bg-accent-soft" onClick={() => confirm("Delete all progress?") && resetData()}>Reset</button>
+          <button className="btn btn-sm text-accent" onClick={() => confirm("Delete all progress?") && resetData()}>Reset</button>
         </div>
-        <p className="mt-2 text-xs text-muted">Progress is stored in this browser. Export regularly until account sync is added.</p>
-      </section>
+        <p className="mt-2 text-xs text-muted">Progress is stored in this browser. Sign in under Account to sync across devices.</p>
+      </details>
     </div>
   );
 }

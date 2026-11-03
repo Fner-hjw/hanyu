@@ -15,45 +15,90 @@ export type TestResult = {
   byLevel: Record<string, { correct: number; total: number }>;
 };
 
+export type BankWord = { zh: string; py: string; en: string; added: string };
+export type Mistake = { count: number; last: string; kind: "word" | "sentence" | "char" | "grammar" | "listen" };
+
 export type AppState = {
   cards: Record<string, StoredCard>;
-  log: Record<string, { reviews: number; newCards: number; correct: number }>;
+  log: Record<string, { reviews: number; newCards: number; correct: number; practice?: number }>;
+  /** word ids the learner marked as already known (excluded from queues) */
+  known: Record<string, true>;
+  notes: Record<string, string>;
+  mistakes: Record<string, Mistake>;
+  bank: Record<string, BankWord>;
+  writing: Record<string, number>; // char -> best accuracy %
   grammarDone: Record<string, boolean>;
   dialoguesDone: Record<string, number>; // best comprehension score %
   tests: TestResult[];
   settings: {
     newPerDay: number;
-    direction: "zh-en" | "en-zh" | "listen";
+    direction: "zh-en" | "en-zh" | "listen" | "type" | "cloze";
     showPinyin: boolean;
     speed: number;
+    dailyGoal: number; // reviews + practice items per day
+    deck: string;
+    targetLevel: number;
+    examDate: string; // ISO date or ""
   };
 };
 
 export const DEFAULT_STATE: AppState = {
   cards: {},
   log: {},
+  known: {},
+  notes: {},
+  mistakes: {},
+  bank: {},
+  writing: {},
   grammarDone: {},
   dialoguesDone: {},
   tests: [],
-  settings: { newPerDay: 10, direction: "zh-en", showPinyin: true, speed: 0.9 },
+  settings: { newPerDay: 10, direction: "zh-en", showPinyin: true, speed: 0.9, dailyGoal: 30, deck: "hsk-4", targetLevel: 5, examDate: "" },
 };
 
 let state: AppState = DEFAULT_STATE;
 let loaded = false;
 const listeners = new Set<() => void>();
 
-function load() {
-  if (loaded || typeof window === "undefined") return;
-  loaded = true;
+function normalize(parsed: unknown): AppState {
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Not a progress file");
+  const p = parsed as Partial<AppState>;
+  const obj = (v: unknown) => (v && typeof v === "object" && !Array.isArray(v) ? v : {});
+  return {
+    ...DEFAULT_STATE,
+    cards: obj(p.cards) as AppState["cards"],
+    log: obj(p.log) as AppState["log"],
+    known: obj(p.known) as AppState["known"],
+    notes: obj(p.notes) as AppState["notes"],
+    mistakes: obj(p.mistakes) as AppState["mistakes"],
+    bank: obj(p.bank) as AppState["bank"],
+    writing: obj(p.writing) as AppState["writing"],
+    grammarDone: obj(p.grammarDone) as AppState["grammarDone"],
+    dialoguesDone: obj(p.dialoguesDone) as AppState["dialoguesDone"],
+    tests: Array.isArray(p.tests) ? p.tests : [],
+    settings: { ...DEFAULT_STATE.settings, ...(obj(p.settings) as Partial<AppState["settings"]>) },
+  };
+}
+
+function readStorage() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      state = { ...DEFAULT_STATE, ...parsed, settings: { ...DEFAULT_STATE.settings, ...parsed.settings } };
-    }
+    if (raw) state = normalize(JSON.parse(raw));
   } catch {
     /* ignore corrupt storage */
   }
+}
+
+function load() {
+  if (loaded || typeof window === "undefined") return;
+  loaded = true;
+  readStorage();
+  // another tab saved progress: adopt it instead of overwriting it later
+  window.addEventListener("storage", (e) => {
+    if (e.key !== KEY) return;
+    readStorage();
+    listeners.forEach((l) => l());
+  });
 }
 
 function commit(next: AppState) {
@@ -134,6 +179,7 @@ export function reviewCard(id: string, rating: Grade) {
     log: {
       ...state.log,
       [day]: {
+        ...prev,
         reviews: prev.reviews + 1,
         newCards: prev.newCards + (isNew ? 1 : 0),
         correct: prev.correct + (rating >= Rating.Good ? 1 : 0),
@@ -163,9 +209,59 @@ export function exportData(): string {
   return JSON.stringify(state, null, 2);
 }
 export function importData(json: string) {
-  const parsed = JSON.parse(json);
-  commit({ ...DEFAULT_STATE, ...parsed, settings: { ...DEFAULT_STATE.settings, ...parsed.settings } });
+  commit(normalize(JSON.parse(json)));
 }
+function bumpLog(patch: { practice?: number }) {
+  const day = todayKey();
+  const prev = state.log[day] ?? { reviews: 0, newCards: 0, correct: 0 };
+  return { ...state.log, [day]: { ...prev, practice: (prev.practice ?? 0) + (patch.practice ?? 0) } };
+}
+/** credit n practice items (listening, speaking, writing, …) toward the daily goal & streak */
+export function logPractice(n = 1) {
+  load();
+  commit({ ...state, log: bumpLog({ practice: n }) });
+}
+export function markKnown(ids: string[], known = true) {
+  load();
+  const next = { ...state.known };
+  for (const id of ids) {
+    if (known) next[id] = true;
+    else delete next[id];
+  }
+  commit({ ...state, known: next });
+}
+export function setNote(id: string, note: string) {
+  load();
+  const notes = { ...state.notes };
+  if (note.trim()) notes[id] = note; else delete notes[id];
+  commit({ ...state, notes });
+}
+export function addMistake(key: string, kind: Mistake["kind"]) {
+  load();
+  const prev = state.mistakes[key];
+  commit({ ...state, mistakes: { ...state.mistakes, [key]: { kind, count: (prev?.count ?? 0) + 1, last: new Date().toISOString() } } });
+}
+export function clearMistake(key: string) {
+  load();
+  const mistakes = { ...state.mistakes };
+  delete mistakes[key];
+  commit({ ...state, mistakes });
+}
+export function addToBank(id: string, w: Omit<BankWord, "added">) {
+  load();
+  commit({ ...state, bank: { ...state.bank, [id]: { ...w, added: new Date().toISOString() } } });
+}
+export function removeFromBank(id: string) {
+  load();
+  const bank = { ...state.bank };
+  delete bank[id];
+  commit({ ...state, bank });
+}
+export function saveWriting(ch: string, pct: number) {
+  load();
+  commit({ ...state, writing: { ...state.writing, [ch]: Math.max(pct, state.writing[ch] ?? 0) } });
+}
+
 export function getState(): AppState {
   load();
   return state;
@@ -173,7 +269,7 @@ export function getState(): AppState {
 /** replace the whole state (used by cloud sync) */
 export function replaceState(next: AppState) {
   load();
-  commit({ ...DEFAULT_STATE, ...next, settings: { ...DEFAULT_STATE.settings, ...next.settings } });
+  commit(normalize(next));
 }
 export function resetData() {
   commit(DEFAULT_STATE);
@@ -192,15 +288,16 @@ export function buildQueue(
     .map((w) => w.id);
   const newToday = s.log[todayKey()]?.newCards ?? 0;
   const room = Math.max(0, opts.newLimit - newToday);
-  const fresh = words.filter((w) => !s.cards[w.id]).slice(0, room).map((w) => w.id);
+  const fresh = words.filter((w) => !s.cards[w.id] && !s.known[w.id]).slice(0, room).map((w) => w.id);
   return { due, fresh };
 }
 
 export function streak(s: AppState): number {
   let n = 0;
   const d = new Date();
-  if (!s.log[todayKey(d)]?.reviews) d.setDate(d.getDate() - 1); // today doesn't break the streak yet
-  while (s.log[todayKey(d)]?.reviews) {
+  const active = (k: string) => (s.log[k]?.reviews ?? 0) + (s.log[k]?.practice ?? 0) > 0;
+  if (!active(todayKey(d))) d.setDate(d.getDate() - 1); // today doesn't break the streak yet
+  while (active(todayKey(d))) {
     n++;
     d.setDate(d.getDate() - 1);
   }
@@ -208,3 +305,10 @@ export function streak(s: AppState): number {
 }
 
 export const isKnown = (c?: StoredCard) => !!c && c.state === State.Review && c.stability >= 7;
+
+/** number of cards due now (optionally limited to a set of ids) */
+export function dueCount(s: AppState, ids?: Iterable<string>): number {
+  const now = Date.now();
+  const list = ids ? [...ids].filter((id) => s.cards[id]) : Object.keys(s.cards);
+  return list.filter((id) => new Date(s.cards[id].due).getTime() <= now).length;
+}

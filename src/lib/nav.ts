@@ -1,0 +1,28 @@
+import {
+  CalendarCheck, Route, Layers, BookText, Headphones, Mic, AudioLines, PenLine, BookOpen,
+  MessagesSquare, Puzzle, ClipboardCheck, Briefcase, NotebookPen, ChartNoAxesColumn, Languages,
+  type LucideIcon,
+} from "lucide-react";
+
+export type NavItem = { href: string; label: string; desc: string; icon: LucideIcon; group: "Learn" | "Practice" | "Tools"; ready: boolean };
+
+/** `ready: false` items are hidden until the feature ships (see ROADMAP.md) */
+export const NAV: NavItem[] = [
+  { href: "/", label: "Today", desc: "Your plan, streak and goals", icon: CalendarCheck, group: "Learn", ready: true },
+  { href: "/learn", label: "Path", desc: "HSK 1–9 lessons, unit by unit", icon: Route, group: "Learn", ready: false },
+  { href: "/flashcards", label: "Review", desc: "Spaced-repetition flashcards", icon: Layers, group: "Learn", ready: true },
+  { href: "/vocab", label: "Vocabulary", desc: "Browse and search every word", icon: BookText, group: "Learn", ready: true },
+  { href: "/listen", label: "Listen", desc: "Real audio, dictation, comprehension", icon: Headphones, group: "Practice", ready: false },
+  { href: "/speak", label: "Speak", desc: "Shadowing and pronunciation scoring", icon: Mic, group: "Practice", ready: false },
+  { href: "/pronounce", label: "Pronounce", desc: "Pinyin chart and tone drills", icon: AudioLines, group: "Practice", ready: false },
+  { href: "/write", label: "Write", desc: "Stroke order and handwriting", icon: PenLine, group: "Practice", ready: false },
+  { href: "/reader", label: "Read", desc: "Graded texts and tap-a-word reader", icon: BookOpen, group: "Practice", ready: true },
+  { href: "/dialogues", label: "Dialogues", desc: "Everyday and workplace conversations", icon: MessagesSquare, group: "Practice", ready: true },
+  { href: "/grammar", label: "Grammar", desc: "Patterns with examples and drills", icon: Puzzle, group: "Practice", ready: true },
+  { href: "/test", label: "Tests", desc: "Level check and mock exams", icon: ClipboardCheck, group: "Tools", ready: true },
+  { href: "/toolkit", label: "Work toolkit", desc: "Emails, numbers, meetings, negotiation", icon: Briefcase, group: "Tools", ready: false },
+  { href: "/mistakes", label: "Mistakes", desc: "Review what you got wrong", icon: NotebookPen, group: "Tools", ready: false },
+  { href: "/stats", label: "Progress", desc: "Stats and study plan", icon: ChartNoAxesColumn, group: "Tools", ready: false },
+];
+export const LOGO = Languages;
+export const visibleNav = () => NAV.filter((n) => n.ready);

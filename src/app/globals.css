@@ -1,56 +1,136 @@
 @import "tailwindcss";
 
+/* ---------- design tokens: paper · ink · vermilion · jade · gold ---------- */
 :root {
-  --bg: #fbf8f3;
-  --card: #ffffff;
-  --fg: #1f1b16;
-  --muted: #6b6258;
-  --line: #e6dfd3;
-  --accent: #b3261e;
-  --accent-soft: #f6e3df;
-  --good: #2e7d32;
-}
-
-:root[data-theme="dark"],
-:root:not([data-theme="light"]) {
+  --bg: #f6f1e8;
+  --card: #fffdf9;
+  --card-2: #faf5ec;
+  --fg: #1e1a15;
+  --muted: #7b7165;
+  --line: #e5dccd;
+  --accent: #c4352b;
+  --accent-fg: #ffffff;
+  --accent-soft: #fbe9e5;
+  --good: #2c7a64;
+  --good-soft: #def0e9;
+  --gold: #b8832a;
+  --gold-soft: #f7ecd2;
+  --sky: #38679f;
+  --sky-soft: #e1ebf7;
+  --shadow: 0 1px 0 rgb(0 0 0 / 0.02), 0 10px 28px -14px rgb(70 45 20 / 0.28);
   color-scheme: light;
 }
-
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #17140f;
-    --card: #211d17;
-    --fg: #f1ece4;
-    --muted: #a39a8c;
-    --line: #373027;
-    --accent: #ef6a5f;
-    --accent-soft: #3a2420;
-    --good: #6fcf76;
+    --bg: #14110e;
+    --card: #1e1a16;
+    --card-2: #241f1a;
+    --fg: #f3eee5;
+    --muted: #a3998b;
+    --line: #342e27;
+    --accent: #ea5a4e;
+    --accent-fg: #1a0b09;
+    --accent-soft: #3a1f1b;
+    --good: #62c3a2;
+    --good-soft: #17332a;
+    --gold: #e2b45c;
+    --gold-soft: #35290f;
+    --sky: #7fb0e6;
+    --sky-soft: #172636;
+    --shadow: 0 1px 0 rgb(255 255 255 / 0.02), 0 10px 28px -14px rgb(0 0 0 / 0.7);
     color-scheme: dark;
   }
+}
+:root[data-theme="dark"] {
+  --bg: #14110e; --card: #1e1a16; --card-2: #241f1a; --fg: #f3eee5; --muted: #a3998b; --line: #342e27;
+  --accent: #ea5a4e; --accent-fg: #1a0b09; --accent-soft: #3a1f1b; --good: #62c3a2; --good-soft: #17332a;
+  --gold: #e2b45c; --gold-soft: #35290f; --sky: #7fb0e6; --sky-soft: #172636;
+  --shadow: 0 1px 0 rgb(255 255 255 / 0.02), 0 10px 28px -14px rgb(0 0 0 / 0.7);
+  color-scheme: dark;
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-card: var(--card);
+  --color-card2: var(--card-2);
   --color-fg: var(--fg);
   --color-muted: var(--muted);
   --color-line: var(--line);
   --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
   --color-accent-soft: var(--accent-soft);
   --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-sky: var(--sky);
+  --color-sky-soft: var(--sky-soft);
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+  --font-serif: "Noto Serif SC", "Songti SC", "STSong", serif;
+  --shadow-card: var(--shadow);
 }
 
+html { -webkit-text-size-adjust: 100%; }
 body {
   background: var(--bg);
   color: var(--fg);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
 }
 
-.han {
-  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", sans-serif;
+/* Chinese text */
+.han { font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", sans-serif; }
+.hanzi { font-family: "Noto Serif SC", "Songti SC", "STSong", "Source Han Serif SC", serif; font-weight: 500; }
+ruby { ruby-position: over; }
+
+/* ---------- components ---------- */
+@layer components {
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 1.1rem;
+    box-shadow: var(--shadow);
+  }
+  .card-flat { background: var(--card); border: 1px solid var(--line); border-radius: 1rem; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    border-radius: 999px; padding: 0.55rem 1.1rem; font-size: 0.9rem; font-weight: 600;
+    border: 1px solid var(--line); background: var(--card); color: var(--fg);
+    transition: background 0.15s, transform 0.05s, border-color 0.15s; cursor: pointer;
+  }
+  .btn:hover { background: var(--accent-soft); }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: var(--accent-fg); border-color: transparent; }
+  .btn-primary:hover { background: var(--accent); filter: brightness(1.07); }
+  .btn-sm { padding: 0.3rem 0.75rem; font-size: 0.8rem; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 999px;
+    border: 1px solid var(--line); padding: 0.25rem 0.75rem; font-size: 0.8rem; color: var(--muted);
+    background: var(--card); cursor: pointer; transition: all 0.15s;
+  }
+  .chip:hover { background: var(--accent-soft); color: var(--fg); }
+  .chip[data-active="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+  .input {
+    width: 100%; border-radius: 0.8rem; border: 1px solid var(--line); background: var(--card);
+    padding: 0.6rem 0.9rem; font-size: 0.95rem; color: var(--fg); outline: none;
+  }
+  .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .opt {
+    display: block; width: 100%; text-align: left; border-radius: 0.8rem; border: 1px solid var(--line);
+    background: var(--card); padding: 0.65rem 0.9rem; transition: all 0.12s; cursor: pointer;
+  }
+  .opt:hover:not(:disabled) { background: var(--accent-soft); }
+  .opt[data-state="picked"] { border-color: var(--accent); background: var(--accent-soft); }
+  .opt[data-state="right"] { border-color: var(--good); background: var(--good-soft); }
+  .opt[data-state="wrong"] { border-color: var(--accent); background: var(--accent-soft); }
 }
 
-ruby {
-  ruby-position: over;
-}
+@keyframes pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.pop { animation: pop 0.25s ease-out both; }
+
+/* hide scrollbars on horizontal chip rows */
+.noscroll { scrollbar-width: none; }
+.noscroll::-webkit-scrollbar { display: none; }

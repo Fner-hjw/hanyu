@@ -1,24 +1,31 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { Nav } from "@/components/Nav";
+import { Shell } from "@/components/Shell";
 import { SyncProvider } from "@/components/SyncProvider";
 
 export const metadata: Metadata = {
-  title: "汉语 – Chinese for work",
-  description: "Flashcards, dialogues, grammar and an HSK-style test for professional Chinese.",
+  title: "Hànyǔ – Chinese for life & work",
+  description: "A complete Chinese learning platform: HSK 1–9 vocabulary, flashcards, listening, speaking, writing, grammar and tests.",
 };
-export const viewport: Viewport = { width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#c4352b" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        {/* App Router root layout applies to every page, so this lint rule (written for pages/) doesn't apply.
+            CJK fonts load via Google's unicode-range slices: only glyphs actually used are downloaded. */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;700&display=swap"
+        />
+      </head>
       <body className="min-h-screen">
         <SyncProvider>
-          <Nav />
-          <main className="mx-auto max-w-4xl px-4 py-6">{children}</main>
-          <footer className="mx-auto max-w-4xl px-4 pb-8 text-xs text-muted">
-            Dictionary: CC-CEDICT © MDBG, <a className="underline" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
-          </footer>
+          <Shell>{children}</Shell>
         </SyncProvider>
       </body>
     </html>
