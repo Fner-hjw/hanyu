@@ -2,12 +2,12 @@
 
 import { useRef, useState } from "react";
 import { Cloud, Download, HardDrive, KeyRound, WifiOff } from "lucide-react";
-import { useSync } from "@/components/SyncProvider";
+import { passkeyError, useSync } from "@/components/SyncProvider";
 import { AiSettings } from "@/components/AiSettings";
 import { PageHeader, Badge, Progress } from "@/components/ui";
 import { useAsync, levelLabel } from "@/lib/data";
 import { clearOffline, downloadForOffline, offlineStatus, offlineSupported } from "@/lib/offline";
-import { getAuthSettings, OAUTH_PROVIDERS, syncConfigured, type AuthSettings, type OAuthProvider } from "@/lib/supabase";
+import { getAuthSettings, getSupabase, OAUTH_PROVIDERS, syncConfigured, type AuthSettings, type OAuthProvider } from "@/lib/supabase";
 import { exportData, importData, resetData, todayKey, useAppState, useHydrated } from "@/lib/store";
 
 export default function Account() {
@@ -61,7 +61,7 @@ function Storage() {
 const PROVIDER_NAME: Record<OAuthProvider, string> = { google: "Google", github: "GitHub", azure: "Microsoft" };
 
 function SignInCard({ settings, loading }: { settings: AuthSettings | null; loading: boolean }) {
-  const { signInOAuth } = useSync();
+  const { signInOAuth, signInPasskey } = useSync();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const providers = OAUTH_PROVIDERS.filter((p) => settings?.[p]);
@@ -78,9 +78,13 @@ function SignInCard({ settings, loading }: { settings: AuthSettings | null; load
           ))}
         </div>
       )}
+      <button type="button" className="btn w-full justify-center gap-2" disabled={busy}
+        onClick={async () => { setBusy(true); setErr(null); setErr(await signInPasskey()); setBusy(false); }}>
+        <KeyRound size={16} /> Sign in with a passkey
+      </button>
+      <p className="text-xs text-muted">New here? Sign in another way first, then add a passkey on this page.</p>
       {err && <p className="text-sm text-accent" role="status">{err}</p>}
       {loading && <p className="text-sm text-muted">Loading sign-in options…</p>}
-      {!loading && providers.length === 0 && <p className="text-sm text-muted">Sign-in isn&apos;t available right now. Your progress is still saved on this device.</p>}
       <p className="text-xs text-muted">Signing in merges what&apos;s on this device with your account, so nothing is lost.</p>
     </div>
   );
@@ -116,6 +120,7 @@ function SignedIn() {
         <button onClick={() => void signOut()} className="btn">Sign out</button>
       </div>
       <p className="text-xs text-muted">Signing out keeps your progress on this device.</p>
+      <Passkeys />
       {provider === "email" && (
         <details className="text-sm">
           <summary className="cursor-pointer font-semibold">Change password</summary>
@@ -131,6 +136,58 @@ function SignedIn() {
           {pwMsg && <p className={`mt-2 ${pwMsg.ok ? "text-good" : "text-accent"}`}>{pwMsg.text}</p>}
         </details>
       )}
+    </div>
+  );
+}
+
+type PasskeyItem = { id: string; friendly_name?: string; created_at: string; last_used_at?: string };
+
+function Passkeys() {
+  const sb = getSupabase();
+  const [list, setList] = useState<PasskeyItem[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const load = useAsync(async () => (sb ? (await sb.auth.passkey.list()).data ?? [] : []), []);
+  const items = list ?? load.data ?? [];
+  const refresh = async () => { if (sb) setList((await sb.auth.passkey.list()).data ?? []); };
+  if (!sb) return null;
+  const date = (d?: string) => (d ? new Date(d).toLocaleDateString() : "never");
+
+  return (
+    <div className="space-y-2 border-t border-line pt-4 text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p className="font-semibold">Passkeys</p>
+          <p className="text-xs text-muted">Sign in with Face ID, a fingerprint or your device PIN, without Google.</p>
+        </div>
+        <button className="btn btn-sm" disabled={busy} onClick={async () => {
+          setBusy(true); setMsg(null);
+          const { error } = await sb.auth.registerPasskey();
+          const text = error ? passkeyError(error) : null;
+          setMsg(error ? (text ? { ok: false, text } : null) : { ok: true, text: "Passkey added." });
+          if (!error) await refresh();
+          setBusy(false);
+        }}><KeyRound size={14} /> Add a passkey</button>
+      </div>
+      {items.length > 0 && (
+        <ul className="divide-y divide-line">
+          {items.map((k) => (
+            <li key={k.id} className="flex items-center justify-between gap-2 py-2">
+              <span className="min-w-0">
+                <span className="block truncate">{k.friendly_name || "Passkey"}</span>
+                <span className="text-xs text-muted">Added {date(k.created_at)} · last used {date(k.last_used_at)}</span>
+              </span>
+              <button className="btn btn-sm" disabled={busy} onClick={async () => {
+                setBusy(true); setMsg(null);
+                const { error } = await sb.auth.passkey.delete({ passkeyId: k.id });
+                if (error) setMsg({ ok: false, text: error.message }); else await refresh();
+                setBusy(false);
+              }}>Remove</button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {msg && <p className={msg.ok ? "text-good" : "text-accent"} role="status">{msg.text}</p>}
     </div>
   );
 }
