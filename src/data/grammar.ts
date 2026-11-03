@@ -37,7 +37,7 @@ export const GRAMMAR: GrammarPoint[] = [
     ],
     exercises: [{
       prompt: "那份合同___客户退回来了。",
-      options: ["把", "被", "让", "跟"],
+      options: ["把", "被", "对", "跟"],
       answer: 1,
       why: "The contract is the one being acted on → 被 (客户 is the agent).",
     }],
@@ -49,11 +49,11 @@ export const GRAMMAR: GrammarPoint[] = [
     level: 4,
     category: "connectors",
     explain:
-      "Concession. Unlike English, Chinese keeps BOTH 虽然 and 但是 – you don't drop one. 虽然 can also come after the subject.",
+      "Concession. Unlike English, Chinese normally marks the second clause too (但是/可是, or 还是/也/却) – don't leave it bare. 虽然 itself can be dropped (价格很高，但是质量很好), and it can also come after the subject.",
     pitfalls: "✗ 虽然价格高，质量好。 ✓ 虽然价格高，但是质量好。 (Keep both halves.)",
     examples: [
       { zh: "虽然价格很高，但是质量很好。", en: "Although the price is high, the quality is very good." },
-      { zh: "他虽然很忙，但是还是来参加会议了。", en: "Although he is busy, he still came to the meeting." },
+      { zh: "他虽然很忙，但是还是来参加会议了。", en: "Although he was busy, he still came to the meeting." },
       { zh: "虽然这个方案有风险，可是值得试一试。", en: "Although this plan is risky, it is worth trying." },
     ],
     exercises: [{
@@ -150,7 +150,7 @@ export const GRAMMAR: GrammarPoint[] = [
     level: 5,
     category: "prepositions",
     explain:
-      "根据 = on the basis of (data, facts, reports). 按照 = following (rules, plans, procedures). 根据 is for evidence, 按照 for standards.",
+      "根据 = on the basis of (data, facts, reports). 按照 = following (rules, plans, procedures). 根据 leans toward evidence, 按照 toward standards to follow, though 根据规定 / 根据合同 are also very common.",
     examples: [
       { zh: "根据最新的数据，销售额在增长。", en: "According to the latest data, sales are growing." },
       { zh: "按照合同，我们应该三十天内付款。", en: "According to the contract, we should pay within thirty days." },
@@ -170,15 +170,15 @@ export const GRAMMAR: GrammarPoint[] = [
     level: 5,
     category: "prepositions",
     explain:
-      "关于 introduces a topic ('regarding'): 关于这个问题. 对于 marks a person's attitude toward something ('as for'): 对于这个方案，我有不同的看法. Never use 关于 with attitudes.",
-    pitfalls: "✗ 关于这个方案，我不同意。 ✓ 对于这个方案，我不同意。 (Attitudes take 对于.)",
+      "关于 introduces a topic ('regarding'): 关于这个问题. 对于 marks a person's attitude toward something ('as for'): 对于这个方案，我有不同的看法. 关于 can only stand at the start of the sentence (✗ 我关于这个方案…), while 对于 can also follow the subject: 我对于这个方案有不同的看法.",
+    pitfalls: "✗ 我关于这个方案不同意。 ✓ 我对于这个方案不同意。 (Only 对于 can follow the subject.)",
     examples: [
       { zh: "关于预算，我们下次再讨论。", en: "Regarding the budget, we'll discuss next time." },
       { zh: "对于这个价格，客户不太满意。", en: "As for this price, the client is not very satisfied." },
       { zh: "关于合同的问题，请联系法务部。", en: "For matters regarding the contract, contact the legal department." },
     ],
     exercises: [{
-      prompt: "___这个报价，我们有一些不同的意见。",
+      prompt: "我们___这个报价有一些不同的意见。",
       options: ["关于", "对于", "按照", "根据"],
       answer: 1,
       why: "Our opinion toward the quote → 对于.",
@@ -211,7 +211,7 @@ export const GRAMMAR: GrammarPoint[] = [
     level: 5,
     category: "emphasis",
     explain:
-      "Emphasises an extreme example: 'even A'. 都 or 也 is required after the subject/verb phrase.",
+      "Emphasises an extreme example: 'even A'. 都 or 也 is required right after the 连 phrase, before the verb.",
     examples: [
       { zh: "他忙得连饭都没吃。", en: "He was so busy he didn't even eat." },
       { zh: "这个问题连经理都不知道。", en: "Even the manager doesn't know this." },

@@ -12,7 +12,10 @@ for (let l = 1; l <= 7; l++) {
   let changed = false;
   for (const w of words) {
     const e = extra[w.i];
-    if (!e || w.x.length) continue;
+    // fill words with no example, and refresh ones this script added before (they have no sentence id)
+    const ours = w.x.length === 1 && w.x[0][0] === "";
+    if (!e || (w.x.length && !ours)) continue;
+    if (ours && w.x[0][1] === e[0] && w.x[0][3] === e[1]) continue;
     // no sentence id: these have no recording, so the app reads them with text-to-speech
     w.x = [["", e[0], py(e[0]), e[1]]];
     added++;
@@ -20,4 +23,4 @@ for (let l = 1; l <= 7; l++) {
   }
   if (changed) writeFileSync(file, JSON.stringify(words));
 }
-console.log(`added ${added} example sentences (${Object.keys(extra).length} available)`);
+console.log(`added or updated ${added} example sentences (${Object.keys(extra).length} available)`);

@@ -130,7 +130,7 @@ export const PACK_ROWS: Row[] = [
   ["知识产权", "zhīshi chǎnquán", "intellectual property", "business", 6, "公司非常重视知识产权保护。", "The company takes IP protection very seriously."],
   ["保密", "bǎomì", "to keep confidential", "business", 6, "这件事请务必保密。", "Please keep this matter strictly confidential."],
   ["保密协议", "bǎomì xiéyì", "non-disclosure agreement", "business", 6, "请先签署保密协议。", "Please sign the NDA first."],
-  ["指标", "zhǐbiāo", "indicator; target figure", "business", 6, "销售指标已经完成了百分之九十。", "The sales target is 90% complete."],
+  ["指标", "zhǐbiāo", "indicator; target figure", "business", 6, "销售指标已经完成了百分之九十。", "We have already reached 90% of the sales target."],
   ["绩效", "jìxiào", "performance (KPI)", "business", 6, "年终奖金与绩效挂钩。", "Year-end bonuses are tied to performance."],
   ["数据", "shùjù", "data", "business", 5, "请把最新的数据发给我。", "Please send me the latest data."],
   ["分析", "fēnxī", "to analyze; analysis", "business", 5, "我们需要深入分析这个问题。", "We need to analyze this problem in depth."],
@@ -165,7 +165,7 @@ export const PACK_ROWS: Row[] = [
   ["盖章", "gàizhāng", "to stamp (with a seal)", "hr", 6, "这份文件还需要盖章。", "This document still needs a company stamp."],
 
   // ---------- Meetings (extra) ----------
-  ["发言", "fāyán", "to speak (at a meeting)", "meetings", 5, "请各位依次发言。", "Please speak one after another."],
+  ["发言", "fāyán", "to speak (at a meeting)", "meetings", 5, "请各位依次发言。", "Please take turns to speak."],
   ["提问", "tíwèn", "to ask a question", "meetings", 5, "大家有问题可以随时提问。", "Feel free to ask questions at any time."],
   ["补充", "bǔchōng", "to add; to supplement", "meetings", 5, "我想补充一点。", "I'd like to add one point."],
   ["澄清", "chéngqīng", "to clarify", "meetings", 6, "我需要澄清一下刚才的数字。", "I need to clarify the figures I gave just now."],
@@ -193,8 +193,8 @@ export const PACK_ROWS: Row[] = [
   ["敬请", "jìngqǐng", "kindly; respectfully request", "email", 6, "敬请查收附件。", "Kindly check the attachment."],
   ["附上", "fùshàng", "to attach; to enclose", "email", 6, "现附上报价单，请审阅。", "The quotation is enclosed; please review."],
   ["烦请", "fánqǐng", "kindly request (formal)", "email", 6, "烦请贵公司尽快确认。", "We kindly ask your company to confirm soon."],
-  ["知悉", "zhīxī", "to be informed (formal)", "email", 6, "特此通知，请知悉。", "Hereby notified; please take note."],
-  ["特此通知", "tècǐ tōngzhī", "hereby notify", "email", 6, "特此通知，会议时间有变。", "Hereby notified: the meeting time has changed."],
+  ["知悉", "zhīxī", "to be informed (formal)", "email", 6, "特此通知，请知悉。", "This is to inform you; please take note."],
+  ["特此通知", "tècǐ tōngzhī", "hereby notify", "email", 6, "会议时间有变，特此通知。", "The meeting time has changed; notice is hereby given."],
   ["催款", "cuīkuǎn", "to chase payment", "email", 6, "我们已经给客户发了催款函。", "We have already sent the client a payment reminder letter."],
   ["抱歉", "bàoqiàn", "to apologize; sorry", "email", 5, "非常抱歉给您带来不便。", "We are very sorry for the inconvenience."],
   ["期待", "qīdài", "to look forward to", "email", 5, "期待与贵公司的进一步合作。", "We look forward to further cooperation with your company."],
@@ -202,7 +202,7 @@ export const PACK_ROWS: Row[] = [
   ["顺颂商祺", "shùnsòng shāngqí", "best regards (formal business closing)", "email", 6, "顺颂商祺！李明", "With best wishes for your business. Li Ming"],
   ["如有变动", "rú yǒu biàndòng", "should there be any changes", "email", 6, "如有变动，我会及时通知您。", "Should there be any changes, I'll notify you promptly."],
   ["请勿回复", "qǐng wù huífù", "please do not reply", "email", 6, "这是系统邮件，请勿回复。", "This is an automated email; please do not reply."],
-  ["谢谢您的耐心", "xièxie nín de nàixīn", "thank you for your patience", "email", 5, "谢谢您的耐心等待。", "Thank you for your patient waiting."],
+  ["谢谢您的耐心", "xièxie nín de nàixīn", "thank you for your patience", "email", 5, "谢谢您的耐心等待。", "Thank you for waiting so patiently."],
 
   // ---------- Negotiation (extra) ----------
   ["议价", "yìjià", "to bargain", "negotiation", 6, "这个价格还有议价的空间吗？", "Is there still room to bargain on this price?"],
@@ -229,7 +229,7 @@ export const PACK_ROWS: Row[] = [
   // ---------- Phone (extra) ----------
   ["请问您找哪位", "qǐngwèn nín zhǎo nǎ wèi", "who would you like to speak to?", "phone", 5, "您好，请问您找哪位？", "Hello, who would you like to speak to?"],
   ["方便吗", "fāngbiàn ma", "is it convenient (to talk)?", "phone", 4, "您现在方便接电话吗？", "Is it convenient for you to talk now?"],
-  ["长话短说", "chánghuà duǎnshuō", "to cut a long story short", "phone", 6, "我长话短说，今天主要是确认付款。", "Let me be brief: today is mainly to confirm payment."],
+  ["长话短说", "chánghuà duǎnshuō", "to cut a long story short", "phone", 6, "我长话短说，今天主要是确认付款。", "Let me keep it short: I'm mainly calling today to confirm the payment."],
   ["打错了", "dǎ cuò le", "wrong number", "phone", 4, "对不起，我打错了。", "Sorry, I dialled the wrong number."],
   ["没人接", "méi rén jiē", "nobody answers", "phone", 4, "我打了好几次，都没人接。", "I called several times and nobody answered."],
   ["稍后回复", "shāohòu huífù", "will reply shortly", "phone", 6, "我现在在开会，稍后回复您。", "I'm in a meeting now and will reply shortly."],
@@ -272,6 +272,6 @@ export const PACK_ROWS: Row[] = [
   ["请多关照", "qǐng duō guānzhào", "please take care of me / look forward to working together", "general", 6, "我是新来的，请多关照。", "I'm new here; I look forward to working with you."],
   ["过奖了", "guòjiǎng le", "you flatter me", "general", 6, "您过奖了，我还有很多要学。", "You flatter me; I still have much to learn."],
   ["时差", "shíchā", "time difference", "general", 5, "我们之间有七个小时的时差。", "There's a seven-hour time difference between us."],
-  ["节假日", "jiéjiàrì", "holidays", "general", 6, "节假日期间银行不办理转账。", "Banks don't process transfers during holidays."],
+  ["节假日", "jiéjiàrì", "holidays", "general", 6, "节假日期间，部分跨行转账可能会延迟到账。", "During holidays, some interbank transfers may arrive late."],
   ["春节", "Chūnjié", "Spring Festival", "general", 4, "春节前我们要把所有款项结清。", "Before Spring Festival we have to settle all payments."],
 ];

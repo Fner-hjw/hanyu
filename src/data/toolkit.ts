@@ -31,8 +31,8 @@ export const EMAILS: EmailTemplate[] = [
     id: "e-payment-reminder",
     title: "Payment reminder (polite to firmer)",
     when: "Use this when an invoice is overdue and you want to press for payment while keeping the relationship.",
-    zh: "刘会计，您好：\n贵司编号为 INV-2026-0318 的发票已于10月31日到期，截至目前我方尚未收到相应款项。\n可能是付款流程上有所延误，烦请您协助核实，并于本周五前安排付款。若款项已经支付，请忽略此邮件，并麻烦提供付款凭证。\n如逾期未付，我们将不得不按合同约定收取滞纳金，还望理解。\n祝好！\n【您的名字】\n财务部",
-    en: "Dear Accountant Liu,\nInvoice No. INV-2026-0318 issued to your company fell due on October 31, and we have not yet received the corresponding payment.\nThere may have been a delay in the payment process. Could you please help check and arrange payment by this Friday? If payment has already been made, please disregard this email and kindly send us the proof of payment.\nIf it remains unpaid past the deadline, we will have to charge a late fee as stipulated in the contract. We hope you understand.\nBest wishes,\n[Your Name]\nFinance Department",
+    zh: "刘会计，您好：\n贵司编号为 INV-2026-0318 的发票已于10月31日到期，截至目前我方尚未收到相应款项。\n可能是付款流程上有所延误，烦请您协助核实，并于本周五前安排付款。若款项已经支付，烦请提供付款凭证，以便我方核对。\n如逾期未付，我们将不得不按合同约定收取滞纳金，还望理解。\n祝好！\n【您的名字】\n财务部",
+    en: "Dear Accountant Liu,\nInvoice No. INV-2026-0318 issued to your company fell due on October 31, and we have not yet received the corresponding payment.\nThere may have been a delay in the payment process. Could you please help check and arrange payment by this Friday? If payment has already been made, kindly send us the proof of payment so that we can check it.\nIf it remains unpaid past the deadline, we will have to charge a late fee as stipulated in the contract. We hope you understand.\nBest wishes,\n[Your Name]\nFinance Department",
     notes: [
       "The first paragraph states facts neutrally; the second offers a face-saving explanation (可能是……) before the request.",
       "贵司 means “your company” and is more formal than 你们公司.",
@@ -110,7 +110,7 @@ export const EMAILS: EmailTemplate[] = [
     title: "Out-of-office auto-reply",
     when: "Use this as your automatic reply during holidays or business trips.",
     zh: "您好！\n感谢您的来信。我目前正在休假（或出差），预计10月8日回到工作岗位，期间无法及时查看邮件。\n如有紧急事务，请联系我的同事张莉，邮箱：【同事邮箱】，电话：【同事电话】。\n我将在返回后尽快回复您，给您带来不便，敬请谅解。\n祝好！\n【您的名字】",
-    en: "Hello!\nThank you for your email. I am currently on leave (or on a business trip) and expect to return to work on October 8, so I will not be able to check email promptly in the meantime.\nFor urgent matters, please contact my colleague Zhang Li, email: [colleague's email], telephone: [colleague's phone].\nI will reply as soon as possible after I return. We apologise for any inconvenience and ask for your understanding.\nBest wishes,\n[Your Name]",
+    en: "Hello!\nThank you for your email. I am currently on leave (or on a business trip) and expect to return to work on October 8, so I will not be able to check email promptly in the meantime.\nFor urgent matters, please contact my colleague Zhang Li, email: [colleague's email], telephone: [colleague's phone].\nI will reply as soon as possible after I return. I apologise for any inconvenience and ask for your understanding.\nBest wishes,\n[Your Name]",
     notes: [
       "休假 is leave or vacation; 出差 is a business trip.",
       "预计……回到工作岗位 (“expect to be back at my post”) is the usual way to state a return date.",
@@ -122,21 +122,21 @@ export const EMAILS: EmailTemplate[] = [
     id: "e-introduce-yourself",
     title: "Introducing yourself to a new client",
     when: "Use this for a first email to a client you have been assigned or referred to.",
-    zh: "郑总，您好：\n我是中信联合银行新任客户经理【您的名字】，经由贵司财务总监林先生介绍，冒昧致信。\n我在跨境金融领域有八年的从业经验，今后将负责贵司的日常业务对接。我们希望了解贵司在融资和外汇管理方面的需求，以便提供更合适的方案。\n不知下周是否方便通话十分钟？\n谨祝商祺！\n【您的名字】",
+    zh: "郑总，您好：\n我是华联银行新任客户经理【您的名字】，经由贵司财务总监林先生介绍，冒昧致信。\n我在跨境金融领域有八年的从业经验，今后将负责贵司的日常业务对接。我们希望了解贵司在融资和外汇管理方面的需求，以便提供更合适的方案。\n不知下周是否方便通话十分钟？\n谨祝商祺！\n【您的名字】",
     en: "Dear Mr. Zheng,\nI am [Your Name], the newly appointed relationship manager at CITIC United Bank. I am writing to you, if I may be so bold, on the introduction of Mr. Lin, your company's Chief Financial Officer.\nI have eight years of experience in cross-border finance and will be responsible for day-to-day contact with your company going forward. We hope to learn about your company's needs in financing and foreign exchange management so that we can offer more suitable solutions.\nWould you be free for a ten-minute call next week?\nWith best wishes,\n[Your Name]",
     notes: [
       "冒昧致信 (“forgive my presumption in writing”) is a humble phrase for contacting someone unsolicited.",
       "经由……介绍 names your referrer, which builds trust quickly.",
       "日常业务对接 means day-to-day business liaison; 对接 is common modern business vocabulary.",
-      "谨祝商祺 is an even more formal variant of 顺颂商祺."
+      "谨祝商祺 is an equally formal alternative to 顺颂商祺."
     ]
   },
   {
     id: "e-decline-politely",
     title: "Declining a request politely",
     when: "Use this to say no to a proposal, discount or request without damaging the relationship.",
-    zh: "黄总，您好：\n感谢贵司对我们的信任，也感谢您提出的合作建议。\n经过慎重考虑，目前我们暂时无法接受降低服务费的方案，主要原因是近期运营成本有所上升，现有价格已接近成本线。\n对此我们深感遗憾。如日后情况有所变化，我们非常乐意重新讨论。\n希望今后仍有合作的机会。\n顺颂商祺！\n【您的名字】",
-    en: "Dear Mr. Huang,\nThank you for your company's trust in us, and thank you for the cooperation proposal you put forward.\nAfter careful consideration, we are unable to accept the plan to reduce service fees for the time being. The main reason is that operating costs have risen recently and the current price is already close to cost.\nWe feel real regret about this. If circumstances change in future, we would be very glad to discuss it again.\nWe hope there will still be opportunities to work together.\nBest regards,\n[Your Name]",
+    zh: "黄总，您好：\n感谢贵司对我们的信任，也感谢您提出的合作建议。\n经过慎重考虑，我们暂时无法接受降低服务费的方案，主要原因是近期运营成本有所上升，现有价格已接近成本线。\n对此我们深感遗憾。如日后情况有所变化，我们非常乐意重新讨论。\n希望今后仍有合作的机会。\n顺颂商祺！\n【您的名字】",
+    en: "Dear Mr. Huang,\nThank you for your company's trust in us, and thank you for the cooperation proposal you put forward.\nAfter careful consideration, we are unable to accept the plan to reduce service fees for the time being. The main reason is that operating costs have risen recently and the current price is already close to cost.\nWe very much regret this. If circumstances change in future, we would be very glad to discuss it again.\nWe hope there will still be opportunities to work together.\nBest regards,\n[Your Name]",
     notes: [
       "Chinese refusals usually begin with thanks and give a reason; a bare 不行 would be abrupt.",
       "暂时无法 (“temporarily unable”) leaves the door open, unlike a flat 不能.",
@@ -148,8 +148,8 @@ export const EMAILS: EmailTemplate[] = [
     id: "e-confirm-agreement",
     title: "Confirming an agreement and next steps",
     when: "Use this to put what was agreed orally into writing.",
-    zh: "马总，您好：\n很高兴今天与贵司就合作事宜达成共识。现确认如下：\n一、合作期限为三年，自2027年1月1日起算；\n二、首期款项30%，于合同签署后七个工作日内支付；\n三、我方法务部将于本周五前发出合同正本。\n以上内容如有不符，请及时告知。\n感谢您的支持与信任！\n此致\n敬礼\n【您的名字】",
-    en: "Dear Mr. Ma,\nWe are delighted to have reached a consensus with your company today on the cooperation. We confirm the following:\n1. The cooperation period is three years, starting from January 1, 2027;\n2. The first installment is 30%, payable within seven working days after the contract is signed;\n3. Our legal department will send out the original contract by this Friday.\nIf any of the above is inconsistent with your understanding, please let's know promptly.\nThank you for your support and trust!\nSincerely,\n[Your Name]",
+    zh: "马总，您好：\n很高兴今天与贵司就合作事宜达成共识。现确认如下：\n一、合作期限为三年，自2027年1月1日起算；\n二、首期款为合同总金额的30%，于合同签署后七个工作日内支付；\n三、我方法务部将于本周五前发出合同正本。\n以上内容如有不符，请及时告知。\n感谢您的支持与信任！\n此致\n敬礼\n【您的名字】",
+    en: "Dear Mr. Ma,\nWe are delighted to have reached a consensus with your company today on the cooperation. We confirm the following:\n1. The cooperation period is three years, starting from January 1, 2027;\n2. The first installment, 30% of the total contract value, is payable within seven working days after the contract is signed;\n3. Our legal department will send out the original contract by this Friday.\nIf any of the above is inconsistent with your understanding, please let us know promptly.\nThank you for your support and trust!\nSincerely,\n[Your Name]",
     notes: [
       "达成共识 means to reach a consensus; 达成一致 is a close alternative.",
       "现确认如下 is the formal opener for a written confirmation.",
@@ -204,8 +204,8 @@ export const PHRASES: PhraseGroup[] = [
     situation: "Presenting numbers & trends",
     intro: "Core vocabulary for reporting growth, decline and comparisons in results meetings.",
     phrases: [
-      { zh: "本季度营业收入同比增长12%。", en: "Operating revenue this quarter grew 12% year on year.", note: "同比 = year on year; 环比 = quarter on quarter." },
-      { zh: "与上个季度相比，利润率环比下降了3个百分点。", en: "Compared with last quarter, the profit margin fell 3 percentage points.", note: "百分点 is the unit for differences between percentages; 3% 下降 would be a relative change." },
+      { zh: "本季度营业收入同比增长12%。", en: "Operating revenue this quarter grew 12% year on year.", note: "同比 = year on year (vs the same period last year); 环比 = vs the immediately preceding period (month on month or quarter on quarter)." },
+      { zh: "利润率环比下降了3个百分点。", en: "Compared with last quarter, the profit margin fell 3 percentage points.", note: "百分点 is the unit for differences between percentages; 下降3% would be a relative change." },
       { zh: "净利润达到两亿三千万元。", en: "Net profit reached 230 million yuan.", note: "Chinese groups digits by 万 (10,000) and 亿 (100 million)." },
       { zh: "毛利率保持在35%左右。", en: "Gross margin stayed at around 35%." },
       { zh: "成本较去年同期上升了约一成。", en: "Costs rose by roughly 10% over the same period last year.", note: "一成 = 10%, 两成 = 20%." },
@@ -266,7 +266,7 @@ export const PHRASES: PhraseGroup[] = [
     phrases: [
       { zh: "喂，您好，请问是李经理吗？", en: "Hello, may I ask if this is Manager Li?" },
       { zh: "我是华信资本的小陈，打电话是想跟您确认一下明天的会议。", en: "This is Chen from Huaxin Capital; I am calling to confirm tomorrow's meeting.", note: "Calling yourself 小 + surname is a humble, friendly self-introduction for younger staff; with very senior clients, give your full name." },
-      { zh: "请问您现在方便接电话吗？", en: "Is it convenient for you to talk now?" },
+      { zh: "请问您现在说话方便吗？", en: "Is it convenient for you to talk now?" },
       { zh: "请稍等，我帮您转接。", en: "One moment please, I will transfer you." },
       { zh: "他现在不在办公室，需要我转告吗？", en: "He is not in the office now; shall I pass on a message?" },
       { zh: "麻烦您让他回我电话。", en: "Please ask him to call me back." },
@@ -343,7 +343,7 @@ export const PHRASES: PhraseGroup[] = [
     situation: "Business dinners & toasts",
     intro: "Phrases for hosting, being a guest, and drinking toasts at a banquet.",
     phrases: [
-      { zh: "您请上座。", en: "Please take the seat of honour.", note: "The host seats the most senior guest facing the door or at the centre." },
+      { zh: "您请上座。", en: "Please take the seat of honour.", note: "上座 is the seat of honour, usually to the host's right; the host normally sits in the main seat facing the door." },
       { zh: "今天我做东，大家不要客气。", en: "I am hosting today, please everyone feel at home.", note: "做东 means to be the host who pays." },
       { zh: "请随意，多吃点。", en: "Make yourself at home and eat more." },
       { zh: "这道菜是这里的招牌菜，您尝尝。", en: "This dish is the house specialty, please try it." },
@@ -353,7 +353,7 @@ export const PHRASES: PhraseGroup[] = [
       { zh: "我不太能喝酒，以茶代酒，可以吗？", en: "I can't drink much; may I use tea instead of wine?", note: "以茶代酒 is widely accepted and polite." },
       { zh: "我先干为敬。", en: "I will drain mine first as a show of respect.", note: "Said when you finish your glass to honour the other person." },
       { zh: "随意随意，您喝多少都行。", en: "As you like, drink as much as you want." },
-      { zh: "今天的晚餐非常丰盛，谢谢您的款待。", en: "Tonight's dinner was very abundant, thank you for your hospitality." },
+      { zh: "今天的晚餐非常丰盛，谢谢您的款待。", en: "Tonight's dinner was a real feast, thank you for your hospitality." },
       { zh: "请允许我买单。", en: "Please allow me to pay the bill.", note: "Hosts often compete to pay, so settle quietly in advance." }
     ]
   }
@@ -373,7 +373,7 @@ export const MEASURE_WORDS: MeasureWord[] = [
   { mw: "场", py: "chǎng", usage: "Counts meetings, matches, performances and events.", examples: [{ zh: "一场会议", en: "a meeting" }, { zh: "明天有两场谈判。", en: "There are two negotiations tomorrow." }] },
   { mw: "次", py: "cì", usage: "Counts occurrences of an action (times).", examples: [{ zh: "去过一次上海", en: "have been to Shanghai once" }, { zh: "这是我第三次来。", en: "This is my third visit." }] },
   { mw: "位", py: "wèi", usage: "A polite measure word for people.", examples: [{ zh: "一位客户", en: "a client" }, { zh: "各位来宾", en: "all the guests" }] },
-  { mw: "条", py: "tiáo", usage: "Counts long, narrow things, and clauses, rules and messages.", examples: [{ zh: "一条消息", en: "a message" }, { zh: "合同有二十条条款。", en: "The contract has twenty clauses." }] },
+  { mw: "条", py: "tiáo", usage: "Counts long, narrow things, and clauses, rules and messages.", examples: [{ zh: "一条消息", en: "a message" }, { zh: "合同一共有二十条。", en: "The contract has twenty clauses." }] },
   { mw: "件", py: "jiàn", usage: "Counts items of clothing, pieces of luggage, matters and cases.", examples: [{ zh: "一件事", en: "a matter" }, { zh: "两件行李", en: "two pieces of luggage" }] },
   { mw: "本", py: "běn", usage: "Counts books, magazines and bound volumes.", examples: [{ zh: "一本书", en: "a book" }, { zh: "他写了两本专著。", en: "He wrote two monographs." }] },
   { mw: "支", py: "zhī", usage: "Counts pens, teams and stick-like objects.", examples: [{ zh: "一支笔", en: "a pen" }, { zh: "我们有一支很强的销售队伍。", en: "We have a very strong sales team." }] },
@@ -409,7 +409,7 @@ export const ETIQUETTE: EtiquetteTip[] = [
   },
   {
     title: "Exchanging business cards",
-    body: "Offer and receive a card with both hands, with the Chinese side facing the recipient. Look at the card for a moment and say something like “久仰大名” (I have long heard of you) before putting it away carefully. Never write on it or shove it into a back pocket in front of the giver."
+    body: "Offer and receive a card with both hands, with the Chinese side facing the recipient. Look at the card for a moment and say something like “幸会” (pleased to meet you) or read out their title before putting it away carefully. Never write on it or shove it into a back pocket in front of the giver."
   },
   {
     title: "WeChat etiquette",
@@ -437,7 +437,7 @@ export const ETIQUETTE: EtiquetteTip[] = [
   },
   {
     title: "Holidays and deadlines",
-    body: "Spring Festival (春节) brings around one to two weeks of holiday, and many companies shut down for even longer, so plan deliveries and payments well before. Golden Week at 国庆节 (October 1) and 劳动节 also bring travel and closures. Confirm 调休 (swapped working days) in the official calendar, as some weekends become working days."
+    body: "Spring Festival (春节) brings an official holiday of about 8–9 days (with 调休), and many companies shut down for even longer, so plan deliveries and payments well before. Golden Week at 国庆节 (October 1) and 劳动节 also bring travel and closures. Confirm 调休 (swapped working days) in the official calendar, as some weekends become working days."
   },
   {
     title: "Hierarchy in meetings",

@@ -19,7 +19,7 @@ export const DIALOGUES: Dialogue[] = [
     level: 5,
     intro: "You are in a finance team meeting. The numbers for Q3 are slightly off.",
     lines: [
-      { who: "李经理", zh: "好，我们开始吧。今天的议程有两个：第三季度的预算执行情况，还有明年的预算方案。", en: "Okay, let's begin. Today's agenda has two items: Q3 budget execution and next year's budget proposal." },
+      { who: "李经理", zh: "好，我们开始吧。今天的议程有两项：第三季度的预算执行情况，还有明年的预算方案。", en: "Okay, let's begin. Today's agenda has two items: Q3 budget execution and next year's budget proposal." },
       { who: "我", zh: "先由我来汇报一下。总的来说，第三季度的收入达到了预期，不过支出比预算高了百分之八。", en: "Let me report first. Overall, Q3 revenue met expectations, but expenses were 8% over budget." },
       { who: "李经理", zh: "支出为什么会增加？具体来说，是哪个部门的问题？", en: "Why did expenses increase? Specifically, which department is the issue?" },
       { who: "我", zh: "主要是市场部。他们临时增加了一次推广活动，所以成本上升了。", en: "Mainly the marketing department. They added a promotion campaign at short notice, so costs went up." },
@@ -45,7 +45,7 @@ export const DIALOGUES: Dialogue[] = [
     intro: "A supplier wants 100% prepayment. You want better terms.",
     lines: [
       { who: "供应商", zh: "这是我们的报价单。按照我们的规定，需要提前支付全部货款。", en: "Here is our quotation. According to our policy, full payment is required in advance." },
-      { who: "我", zh: "谢谢。价格我们可以接受，不过付款方式可能有点儿困难。", en: "Thank you. We can accept the price, but the payment method might be a bit difficult." },
+      { who: "我", zh: "谢谢。价格我们可以接受，不过付款方式上我们可能有点儿困难。", en: "Thank you. We can accept the price, but the payment method might be a bit difficult." },
       { who: "供应商", zh: "是吗？具体是哪方面的问题？", en: "Is that so? What exactly is the problem?" },
       { who: "我", zh: "我们公司的现金流比较紧张。如果要全额预付，会影响其他项目。", en: "Our company's cash flow is rather tight. A full prepayment would affect other projects." },
       { who: "供应商", zh: "那你们的想法是什么？", en: "So what do you have in mind?" },
@@ -53,8 +53,8 @@ export const DIALOGUES: Dialogue[] = [
       { who: "供应商", zh: "这个比例对我们来说风险太大了。百分之五十怎么样？", en: "That ratio is too risky for us. How about 50%?" },
       { who: "我", zh: "这样吧，我们各让一步：签约时付百分之四十，另外，我们可以增加订购数量。", en: "Let's each give a little: 40% on signing, and in addition we can increase the order quantity." },
       { who: "供应商", zh: "订购数量增加多少？如果数量够大，我们可以再给一点折扣。", en: "By how much? If the quantity is large enough, we can give a bit more discount." },
-      { who: "我", zh: "增加百分之二十。希望我们能达成双赢的合作。", en: "20% more. I hope we can reach a win-win cooperation." },
-      { who: "供应商", zh: "好，我回去跟经理确认一下，明天给你答复。", en: "Okay, I'll confirm with my manager and give you an answer tomorrow." },
+      { who: "我", zh: "增加百分之二十。希望我们能实现双赢。", en: "20% more. I hope we can reach a win-win cooperation." },
+      { who: "供应商", zh: "好，我回去跟经理确认一下，明天给您答复。", en: "Okay, I'll confirm with my manager and give you an answer tomorrow." },
     ],
     questions: [
       { q: "供应商一开始要求怎么付款？", options: ["货到付款", "提前支付全部货款", "分三次付款", "用现金付款"], answer: 1 },
@@ -91,13 +91,13 @@ export const DIALOGUES: Dialogue[] = [
     titleZh: "跟进邮件",
     scenario: "email",
     level: 5,
-    intro: "An email exchange as a reading dialogue. Notice the formal register.",
+    intro: "A business email as a reading text. Notice the formal register.",
     lines: [
       { who: "发件人", zh: "王经理，您好！", en: "Dear Manager Wang," },
       { who: "发件人", zh: "感谢您上周抽出时间与我们见面。会上讨论的合作方案，我已经整理好，请见附件。", en: "Thank you for taking time to meet us last week. I have organized the cooperation proposal discussed at the meeting; please see the attachment." },
       { who: "发件人", zh: "为了尽快推进项目，我们建议在本月底之前确认合同的主要条款。如果您有任何疑问，请随时与我联系。", en: "To advance the project as soon as possible, we suggest confirming the main contract terms before the end of this month. If you have any questions, please contact me at any time." },
       { who: "发件人", zh: "另外，我已将此邮件抄送给财务部的李女士，方便后续付款事宜的沟通。", en: "In addition, I have cc'd Ms. Li of the finance department to facilitate communication on follow-up payment matters." },
-      { who: "发件人", zh: "期待您的回复。此致敬礼！张伟", en: "Looking forward to your reply. Yours sincerely, Zhang Wei" },
+      { who: "发件人", zh: "期待您的回复。\n此致\n敬礼！\n张伟", en: "Looking forward to your reply. Yours sincerely, Zhang Wei" },
     ],
     questions: [
       { q: "写这封邮件的主要目的是什么？", options: ["拒绝合作", "发送方案并推进合同确认", "通知会议取消", "要求退款"], answer: 1 },
@@ -113,10 +113,10 @@ export const DIALOGUES: Dialogue[] = [
     intro: "Relationship building (关系) matters. Practise polite, relaxed talk.",
     lines: [
       { who: "客户", zh: "久仰大名！听说你对中国市场很了解。", en: "I've long heard of you! I hear you know the Chinese market well." },
-      { who: "我", zh: "您过奖了。我只是学了几年中文，还在努力。今天能认识您，我很高兴。", en: "You flatter me. I've only studied Chinese for a few years and am still working at it. I'm delighted to meet you today." },
+      { who: "我", zh: "您过奖了。我只是在中国工作了几年，还有很多要学习的。今天能认识您，我很高兴。", en: "You flatter me. I've only worked in China for a few years and still have a lot to learn. I'm delighted to meet you today." },
       { who: "客户", zh: "你的中文说得很好！来，我敬你一杯。", en: "Your Chinese is very good! Come, let me toast you." },
       { who: "我", zh: "谢谢！我也敬您，感谢您对我们公司的支持。", en: "Thank you! I'll toast you too, thank you for supporting our company." },
-      { who: "客户", zh: "你们最近出差多吗？", en: "Do you travel a lot for work recently?" },
+      { who: "客户", zh: "你们最近出差多吗？", en: "Have you been travelling much for work lately?" },
       { who: "我", zh: "是的，下个月要去上海。对了，您有什么好的餐厅可以推荐吗？", en: "Yes, I'm going to Shanghai next month. By the way, do you have any good restaurants to recommend?" },
       { who: "客户", zh: "当然有！我给你发几个地址。", en: "Of course! I'll send you a few addresses." },
     ],

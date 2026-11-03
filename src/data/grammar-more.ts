@@ -10,7 +10,7 @@ export const GRAMMAR_MORE: GrammarPoint[] = [
     category: "sentence structure",
     explain:
       "是 links two nouns or noun phrases: A is B. It does not mean “is” before an adjective, so don’t use it to say “I am busy”. Negate it with 不是, and ask a yes/no question with 是不是 or by adding 吗.",
-    pitfalls: "✗ 我是很忙。 ✓ 我很忙。 (Adjectives take 很, not 是.)",
+    pitfalls: "✗ 我是忙。 ✓ 我很忙。 (Adjectives take 很, not 是; stressed 我是很忙 means “I really am busy”.)",
     examples: [
       { zh: "我是学生。", en: "I am a student." },
       { zh: "他不是我的同事，是我的客户。", en: "He is not my colleague; he is my client." },
@@ -59,7 +59,7 @@ export const GRAMMAR_MORE: GrammarPoint[] = [
       { zh: "这个价格可以吗？", en: "Is this price okay?" },
     ],
     exercises: [
-      { prompt: "你喜欢这个方案___？", options: ["吗", "呢", "吧", "了"], answer: 0, why: "吗 turns a statement into a yes/no question." },
+      { prompt: "你喜欢这个方案___？", options: ["吗", "呢", "的", "了"], answer: 0, why: "吗 turns a statement into a yes/no question." },
       { prompt: "Which is a correct yes/no question?", options: ["你是学生吗不？", "你吗是学生？", "你是学生吗？", "吗你是学生？"], answer: 2, why: "吗 always comes at the end of the sentence." },
       { prompt: "Which question is correct?", options: ["你叫什么名字吗？", "你叫什么名字？", "你叫吗什么名字？", "什么你叫名字？"], answer: 1, why: "A question word like 什么 already makes it a question, so 吗 is not added." },
     ],
@@ -175,7 +175,7 @@ export const GRAMMAR_MORE: GrammarPoint[] = [
     level: 1,
     category: "questions",
     explain:
-      "Chinese question words do not move to the front. Put 什么, 谁, 哪儿, 几 or 多少 exactly where the answer would go: 你想吃什么？ Use 几 for small numbers (usually under ten) and 多少 for larger or unknown numbers.",
+      "Chinese question words do not move to the front. Put 什么, 谁, 哪儿, 几 or 多少 exactly where the answer would go: 你想吃什么？ Use 几 for small numbers (usually under ten), always with a measure word (几个人), and 多少 for larger or unknown numbers, where the measure word is optional (多少人).",
     pitfalls: "✗ 什么你想吃？ ✓ 你想吃什么？ (The question word takes the place of the answer.)",
     examples: [
       { zh: "你想吃什么？", en: "What do you want to eat?" },
@@ -185,7 +185,7 @@ export const GRAMMAR_MORE: GrammarPoint[] = [
     ],
     exercises: [
       { prompt: "你们部门有___人？", options: ["几", "多少", "谁", "哪儿"], answer: 1, why: "A larger, unknown number takes 多少." },
-      { prompt: "你家有___口人？", options: ["多少", "什么", "几", "谁"], answer: 2, why: "Family size is a small number, so 几." },
+      { prompt: "你家有___口人？", options: ["哪儿", "什么", "几", "谁"], answer: 2, why: "Family size is a small number, so 几." },
       { prompt: "你在___工作？", options: ["谁", "哪儿", "几", "多少"], answer: 1, why: "哪儿 replaces the place in 在 + place + V." },
     ],
   },
@@ -352,7 +352,7 @@ export const GRAMMAR_MORE: GrammarPoint[] = [
     ],
     exercises: [
       { prompt: "因为路上堵车，___我迟到了。", options: ["但是", "所以", "而且", "如果"], answer: 1, why: "所以 introduces the result of the cause." },
-      { prompt: "___今天是周末，所以银行不开门。", options: ["因为", "虽然", "如果", "除了"], answer: 0, why: "因为 introduces the cause." },
+      { prompt: "___今天是周末，所以我们不用上班。", options: ["因为", "虽然", "如果", "除了"], answer: 0, why: "因为 introduces the cause." },
       { prompt: "因为数据有问题，___我们要重新做报告。", options: ["可是", "不过", "然而", "所以"], answer: 3, why: "A result clause needs 所以, not a contrast word." },
     ],
   },
@@ -477,7 +477,7 @@ export const GRAMMAR_MORE: GrammarPoint[] = [
       { zh: "财年快结束了，我们要抓紧时间。", en: "The fiscal year is about to end, so we need to hurry." },
     ],
     exercises: [
-      { prompt: "天阴了，___下雨了。", options: ["已经", "刚", "要", "曾经"], answer: 2, why: "要…了 means “about to”." },
+      { prompt: "天阴了，___下雨了。", options: ["正在", "刚", "要", "曾经"], answer: 2, why: "要…了 means “about to”." },
       { prompt: "下个星期___放假了，大家都很高兴。", options: ["快要", "就要", "正在", "刚刚"], answer: 1, why: "With a time word like 下个星期, use 就要." },
       { prompt: "电影___开始了，我们快进去吧。", options: ["快", "才", "刚", "曾"], answer: 0, why: "快…了 means “almost, about to”." },
     ],
@@ -586,7 +586,7 @@ export const GRAMMAR_MORE: GrammarPoint[] = [
     exercises: [
       { prompt: "价格越低，客户___愿意买。", options: ["很", "越", "最", "才"], answer: 1, why: "越…越… needs 越 in both halves." },
       { prompt: "越早交报告越___。", options: ["很好", "好了", "好", "最"], answer: 2, why: "No degree word is added after the second 越." },
-      { prompt: "这本书我越看越___。", options: ["喜欢", "很喜欢", "喜欢了", "太喜欢"], answer: 0, why: "A plain verb or adjective follows the second 越." },
+      { prompt: "这本书我越看越___。", options: ["喜欢", "很喜欢", "非常喜欢", "太喜欢"], answer: 0, why: "A plain verb or adjective follows the second 越." },
     ],
   },
   {
@@ -669,7 +669,7 @@ export const GRAMMAR_MORE: GrammarPoint[] = [
     exercises: [
       { prompt: "你是怎么来公司___？", options: ["了", "的", "过", "着"], answer: 1, why: "是…的 ends with 的." },
       { prompt: "我们是去年在北京认识___。", options: ["了", "着", "的", "过"], answer: 2, why: "Time and place are being emphasised, so 是…的." },
-      { prompt: "这个邮件是谁___的？", options: ["发", "发了", "发过", "发着"], answer: 0, why: "No aspect particle inside 是…的." },
+      { prompt: "这封邮件是谁___的？", options: ["发", "发了", "发过", "发着"], answer: 0, why: "No aspect particle inside 是…的." },
     ],
   },
   {
@@ -859,7 +859,7 @@ export const GRAMMAR_MORE: GrammarPoint[] = [
     ],
     exercises: [
       { prompt: "他工作太忙，___连周末都不休息。", options: ["可是", "因为", "除非", "甚至"], answer: 3, why: "甚至 introduces the extreme example." },
-      { prompt: "这个软件很容易，___老人都会用。", options: ["所以", "甚至", "如果", "只要"], answer: 1, why: "甚至 + 都 emphasises that even the elderly can use it." },
+      { prompt: "这个软件很容易，___老人都会用。", options: ["虽然", "甚至", "如果", "只要"], answer: 1, why: "甚至 + 都 emphasises that even the elderly can use it." },
       { prompt: "他太累了，甚至连饭___没吃就睡了。", options: ["都", "才", "就", "又"], answer: 0, why: "连…都… pairs with 甚至." },
     ],
   },
@@ -891,7 +891,7 @@ export const GRAMMAR_MORE: GrammarPoint[] = [
     level: 4,
     category: "emphasis",
     explain:
-      "并 placed before a negative strengthens it and corrects an assumption: “actually not”, “not at all”. It can only come before 不, 没 or 非. Without a negative it is wrong.",
+      "并 placed before a negative strengthens it and corrects an assumption: “actually not”, “not at all”. As this emphatic adverb it only comes before 不, 没 or 非. (In formal writing 并 is also a conjunction meaning “and”: 讨论并通过了方案.)",
     pitfalls: "✗ 这个价格并很高。 ✓ 这个价格并不高。",
     examples: [
       { zh: "这个方案并不复杂。", en: "This plan is actually not complicated." },
@@ -1006,11 +1006,11 @@ export const GRAMMAR_MORE: GrammarPoint[] = [
       { zh: "我之所以选择这家公司，是因为它的发展前景好。", en: "The reason I chose this company is that it has good prospects." },
       { zh: "项目之所以延期，是因为需求变更太多。", en: "The reason the project was delayed is that there were too many changes in requirements." },
       { zh: "他之所以能成功，主要是因为从不放弃。", en: "He was able to succeed mainly because he never gave up." },
-      { zh: "银行之所以提高利率，是因为要控制通胀。", en: "The reason the bank raised interest rates is to control inflation." },
+      { zh: "央行之所以加息，是因为要控制通胀。", en: "The reason the bank raised interest rates is to control inflation." },
     ],
     exercises: [
-      { prompt: "他之所以辞职，___因为想去国外发展。", options: ["就", "是", "才", "还"], answer: 1, why: "之所以…是因为… is the fixed pair." },
-      { prompt: "公司之所以亏损，___因为成本太高。", options: ["却", "就", "是", "才"], answer: 2, why: "是因为 introduces the reason." },
+      { prompt: "他之所以辞职，___因为想去国外发展。", options: ["而", "是", "才", "还"], answer: 1, why: "之所以…是因为… is the fixed pair." },
+      { prompt: "公司之所以亏损，___因为成本太高。", options: ["却", "并", "是", "才"], answer: 2, why: "是因为 introduces the reason." },
       { prompt: "我们之所以推迟发布，是___客户要求修改。", options: ["因为", "所以", "虽然", "即使"], answer: 0, why: "是因为 states the cause." },
     ],
   },

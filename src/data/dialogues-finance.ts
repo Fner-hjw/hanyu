@@ -10,7 +10,7 @@ export const DIALOGUES_FINANCE: Dialogue[] = [
     intro: "You are the accounting manager. It is the last day of the month-end close, and a colleague is still missing some invoices.",
     lines: [
       { who: "我", zh: "小张，今天是结账的最后一天，应付账款这边还有几张发票没有入账，是怎么回事？", en: "Xiao Zhang, today is the last day of the close, and several invoices in accounts payable haven't been booked. What's going on?" },
-      { who: "小张", zh: "对不起，有三张发票还在业务部，他们说客户还没有确认。", en: "Sorry, three invoices are still with the business department. They say the client hasn't confirmed yet." },
+      { who: "小张", zh: "对不起，有三张发票还在业务部，他们还没有审核签字。", en: "Sorry, three invoices are still with the business department. They haven't been approved and signed off yet." },
       { who: "我", zh: "是哪几张？金额一共是多少？", en: "Which ones? What is the total amount?" },
       { who: "小张", zh: "一共三张，合计十八万六千元，都是十月份的运输费。", en: "Three in total, 186,000 yuan altogether, all transportation fees for October." },
       { who: "我", zh: "这个金额不小。如果今天不入账，利润就会虚高，审计的时候会有麻烦。", en: "That's not a small amount. If it isn't booked today, profit will be overstated, and we'll have trouble at audit time." },
@@ -18,7 +18,7 @@ export const DIALOGUES_FINANCE: Dialogue[] = [
       { who: "我", zh: "好。万一拿不到，就先按预估金额做预提，等发票到了再调整。", en: "Good. If you can't get them, book an accrual at the estimated amount first, and adjust once the invoices arrive." },
       { who: "小张", zh: "明白。另外，银行对账单上有一笔两万元的差异，我还没查清楚。", en: "Understood. Also, there is a 20,000 yuan difference on the bank statement that I haven't worked out yet." },
       { who: "我", zh: "你查一下是不是未达账项。上个月也出现过类似的情况。", en: "Check whether it's a reconciling item in transit. Something similar happened last month." },
-      { who: "小张", zh: "对，我记得是客户月底才转账。我查完马上告诉您。", en: "Right, I remember the client only transferred the money at month-end. I'll tell you as soon as I've checked." },
+      { who: "小张", zh: "对，上个月是因为客户月底才转账。我查完马上告诉您。", en: "Right, I remember the client only transferred the money at month-end. I'll tell you as soon as I've checked." },
       { who: "我", zh: "辛苦了。五点之前把结账清单发给我，明天上午要交给财务总监。", en: "Thanks for your hard work. Send me the closing checklist before five; it goes to the finance director tomorrow morning." },
     ],
     questions: [
@@ -57,12 +57,12 @@ export const DIALOGUES_FINANCE: Dialogue[] = [
   {
     id: "d-credit-limit-call",
     title: "Credit limit increase call",
-    titleZh: "客户申请提高授信额度",
+    titleZh: "客户申请提高信用额度",
     scenario: "phone",
     level: 5,
     intro: "You work in credit control. You are on the phone with a client's CFO, who wants a higher credit limit.",
     lines: [
-      { who: "我", zh: "赵总，您好，我是华信公司财务部的。听说您想申请提高授信额度，是吗？", en: "Mr. Zhao, hello, I'm from the finance department at Huaxin. I hear you want to apply for a higher credit limit, is that right?" },
+      { who: "我", zh: "赵总，您好，我是华信公司财务部的。听说您想申请提高信用额度，是吗？", en: "Mr. Zhao, hello, I'm from the finance department at Huaxin. I hear you want to apply for a higher credit limit, is that right?" },
       { who: "赵总", zh: "对，你好。我们下个季度订单增加了不少，现在的额度恐怕不够用。", en: "Yes, hello. Our orders will increase quite a bit next quarter, and I'm afraid the current limit won't be enough." },
       { who: "我", zh: "目前您的额度是两百万元，已经用了一百八十万。请问您希望提高到多少？", en: "Your current limit is two million yuan, and 1.8 million has been used. How much would you like it raised to?" },
       { who: "赵总", zh: "最好能提高到四百万，账期也希望从三十天延长到六十天。", en: "Ideally four million, and we'd also like the payment period extended from thirty days to sixty." },
@@ -75,7 +75,7 @@ export const DIALOGUES_FINANCE: Dialogue[] = [
       { who: "我", zh: "审批需要三到五个工作日，有结果我马上通知您。", en: "Approval takes three to five working days. I'll notify you as soon as there is a result." },
     ],
     questions: [
-      { q: "赵总公司现在的授信额度是多少？", options: ["一百八十万元", "两百万元", "三百万元", "四百万元"], answer: 1 },
+      { q: "赵总公司现在的信用额度是多少？", options: ["一百八十万元", "两百万元", "三百万元", "四百万元"], answer: 1 },
       { q: "“我”最后提出的方案是什么？", options: ["额度四百万元，账期六十天", "额度不变", "额度三百万元，账期四十五天", "拒绝申请"], answer: 2 },
       { q: "审批需要多长时间？", options: ["三到五个工作日", "一天", "一个月", "三个月"], answer: 0 },
     ],
@@ -119,8 +119,8 @@ export const DIALOGUES_FINANCE: Dialogue[] = [
       { who: "孙总", zh: "好的，需要准备什么材料？", en: "Okay, what documents do I need to prepare?" },
       { who: "我", zh: "请出示营业执照、公司章程，还有法定代表人的身份证。", en: "Please show your business license, the articles of association, and the legal representative's ID card." },
       { who: "孙总", zh: "都带来了。这是营业执照和章程，身份证在这里。", en: "I've brought everything. Here are the business license and articles, and the ID card is here." },
-      { who: "我", zh: "谢谢。我们还需要知道公司的实际控制人，也就是最终持股超过百分之二十五的自然人。", en: "Thank you. We also need to know the company's beneficial owners, that is, individuals who ultimately hold more than 25% of the shares." },
-      { who: "孙总", zh: "我持有百分之四十，我太太持有百分之三十，剩下的是两位投资人。", en: "I hold 40%, my wife holds 30%, and the rest belongs to two investors." },
+      { who: "我", zh: "谢谢。我们还需要知道公司的受益所有人，也就是最终持股超过百分之二十五的自然人。", en: "Thank you. We also need to know the company's beneficial owners, that is, individuals who ultimately hold more than 25% of the shares." },
+      { who: "孙总", zh: "我持有百分之四十，我太太持有百分之三十，剩下的由两位投资人平分。", en: "I hold 40%, my wife holds 30%, and the remaining 30% is split equally between two investors." },
       { who: "我", zh: "好的，那么需要您和您太太两位都提供身份证明，并且签字确认。", en: "Okay, then both you and your wife need to provide proof of identity and sign to confirm." },
       { who: "孙总", zh: "可以，她下周一过来。另外，这个流程要多久？", en: "Fine, she will come next Monday. Also, how long does this process take?" },
       { who: "我", zh: "材料齐全的话，审核大概需要三个工作日。我们还要核查资金来源和主要的交易对手。", en: "If the documents are complete, review takes about three working days. We also have to verify the source of funds and your main counterparties." },

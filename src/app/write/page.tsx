@@ -155,7 +155,7 @@ function Practice({ custom, setCustom }: { custom: string[] | null; setCustom: (
 
 function Radicals({ onPick }: { onPick: (chars: string[]) => void }) {
   const [q, setQ] = useState("");
-  const list = RADICALS.filter((r) => !q || r.meaning.toLowerCase().includes(q.toLowerCase()) || r.r.includes(q) || (r.forms ?? "").includes(q) || r.examples.includes(q));
+  const list = [...RADICALS].sort((a, b) => a.strokes - b.strokes).filter((r) => !q || r.meaning.toLowerCase().includes(q.toLowerCase()) || r.r.includes(q) || (r.forms ?? "").includes(q) || r.examples.includes(q));
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted">Radicals are the building blocks of characters and often hint at meaning: 氵(water) appears in 河 river, 湖 lake, 洗 wash. Tap a radical to practise writing its example characters.</p>
