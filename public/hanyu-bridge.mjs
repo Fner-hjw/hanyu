@@ -23,13 +23,18 @@
  *                                           comma-separated). Without it any site may try, but
  *                                           only one that has the pairing token gets an answer.
  *   --new-token                             forget the saved pairing token and make a new one
+ *   --install                               start the bridge automatically at every login (macOS, Windows,
+ *                                           Linux) and start it now; keeps --port / --origin
+ *   --uninstall                             stop it and remove the automatic start
+ *   --token                                 print the pairing token and exit
  */
 import http from "node:http";
 import { spawn, spawnSync } from "node:child_process";
 import { randomBytes, timingSafeEqual } from "node:crypto";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
+import { copyFileSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const VERSION = 1;
 const IS_WIN = process.platform === "win32";
@@ -42,7 +47,7 @@ const argv = process.argv.slice(2);
 const opt = (name) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : undefined; };
 const allOpts = (name) => argv.flatMap((a, i) => (a === name && argv[i + 1] ? [argv[i + 1]] : []));
 if (argv.includes("--help") || argv.includes("-h")) {
-  console.log("Usage: node hanyu-bridge.mjs [--port 11435] [--origin https://your-hanyu-site.example] [--new-token]");
+  console.log("Usage: node hanyu-bridge.mjs [--port 11435] [--origin https://your-hanyu-site.example] [--new-token] [--install | --uninstall | --token]");
   process.exit(0);
 }
 const PORT = Number(opt("--port") ?? process.env.HANYU_BRIDGE_PORT ?? 11435);
@@ -70,11 +75,6 @@ function loadToken() {
   return token;
 }
 const TOKEN = loadToken();
-const tokenOk = (h) => {
-  const got = Buffer.from(String(h ?? "").replace(/^Bearer\s+/i, ""));
-  const want = Buffer.from(TOKEN);
-  return got.length === want.length && timingSafeEqual(got, want);
-};
 
 /* ---------- the CLIs ---------- */
 const CLIS = {
@@ -236,6 +236,175 @@ function cliError(cli, raw) {
   return `${CLIS[cli].name} failed${last ? `: ${last}` : "."}${hint}`;
 }
 
+/* ---------- start at login ---------- */
+const LABEL = "app.hanyueasy.bridge";
+const INSTALLED = join(CONF_DIR, "hanyu-bridge.mjs");
+const LOG = join(CONF_DIR, "bridge.log");
+const run = (cmd, args) => spawnSync(cmd, args, { encoding: "utf8", windowsHide: true });
+const xml = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/** --port / --origin to pass on to the background copy */
+function serviceArgs() {
+  const a = [INSTALLED];
+  if (opt("--port")) a.push("--port", String(PORT));
+  for (const o of ORIGINS) a.push("--origin", o);
+  return a;
+}
+
+/** stops the background copy on Windows (the node process running the installed path) */
+function stopWindows() {
+  run("powershell", ["-NoProfile", "-Command",
+    `Get-CimInstance Win32_Process -Filter "Name='node.exe'" | Where-Object { $_.ProcessId -ne ${process.pid} -and $_.CommandLine -like '*${INSTALLED.replace(/'/g, "")}*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }`]);
+}
+
+function install() {
+  // run from a stable copy, so the downloaded file can be moved or deleted
+  mkdirSync(CONF_DIR, { recursive: true, mode: 0o700 });
+  const self = fileURLToPath(import.meta.url);
+  if (self !== INSTALLED) copyFileSync(self, INSTALLED);
+  const node = process.execPath;
+  // services start with a bare PATH: keep this terminal's, so claude / codex / vibe are found
+  const path = process.env.PATH ?? "";
+  const args = serviceArgs();
+
+  if (process.platform === "darwin") {
+    const plist = join(homedir(), "Library", "LaunchAgents", `${LABEL}.plist`);
+    mkdirSync(join(homedir(), "Library", "LaunchAgents"), { recursive: true });
+    writeFileSync(plist, `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>${LABEL}</string>
+  <key>ProgramArguments</key>
+  <array>
+${[node, ...args].map((a) => `    <string>${xml(a)}</string>`).join("\n")}
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict><key>PATH</key><string>${xml(path)}</string></dict>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>${xml(LOG)}</string>
+  <key>StandardErrorPath</key><string>${xml(LOG)}</string>
+</dict>
+</plist>
+`);
+    const domain = `gui/${process.getuid()}`;
+    run("launchctl", ["bootout", `${domain}/${LABEL}`]); // already installed: restart with the new settings
+    const r = run("launchctl", ["bootstrap", domain, plist]);
+    if (r.status !== 0) throw new Error(`launchctl couldn't start the bridge: ${(r.stderr || r.stdout).trim()}`);
+  } else if (IS_WIN) {
+    const startup = join(process.env.APPDATA ?? join(homedir(), "AppData", "Roaming"), "Microsoft", "Windows", "Start Menu", "Programs", "Startup");
+    const vbs = join(startup, "Hanyu Easy bridge.vbs");
+    const q = (a) => `""${a.replace(/"/g, "")}""`;
+    // a .vbs in the Startup folder runs node with no console window
+    writeFileSync(vbs, `' Starts the Hanyu Easy local AI bridge at login. Remove with: node "${INSTALLED}" --uninstall
+Set sh = CreateObject("WScript.Shell")
+sh.Environment("Process")("PATH") = "${path.replace(/"/g, "")}"
+sh.Run "cmd /c ""${q(node)} ${args.map(q).join(" ")} >> ${q(LOG)} 2>&1""", 0, False
+`);
+    stopWindows(); // already installed: restart with the new settings
+    const r = run("wscript", [vbs]);
+    if (r.status !== 0) throw new Error(`Couldn't start the bridge: ${(r.stderr || r.stdout).trim()}`);
+  } else {
+    const hasSystemd = run("systemctl", ["--user", "show-environment"]).status === 0;
+    if (hasSystemd) {
+      const dir = join(homedir(), ".config", "systemd", "user");
+      mkdirSync(dir, { recursive: true });
+      const sq = (a) => `"${a.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+      writeFileSync(join(dir, "hanyu-bridge.service"), `[Unit]
+Description=Hanyu Easy local AI bridge
+
+[Service]
+ExecStart=${[node, ...args].map(sq).join(" ")}
+Environment=${sq(`PATH=${path}`)}
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:${LOG}
+StandardError=append:${LOG}
+
+[Install]
+WantedBy=default.target
+`);
+      run("systemctl", ["--user", "daemon-reload"]);
+      const r = run("systemctl", ["--user", "enable", "--now", "hanyu-bridge.service"]);
+      if (r.status !== 0) throw new Error(`systemctl couldn't start the bridge: ${(r.stderr || r.stdout).trim()}`);
+      run("systemctl", ["--user", "restart", "hanyu-bridge.service"]); // already running: pick up new settings
+    } else {
+      // desktops without systemd: XDG autostart, and start it now in the background
+      const dir = join(homedir(), ".config", "autostart");
+      mkdirSync(dir, { recursive: true });
+      const sh = (a) => `'${a.replace(/'/g, "'\\''")}'`;
+      const line = `env PATH=${sh(path)} ${[node, ...args].map(sh).join(" ")} >> ${sh(LOG)} 2>&1`;
+      writeFileSync(join(dir, "hanyu-bridge.desktop"), `[Desktop Entry]
+Type=Application
+Name=Hanyu Easy bridge
+Exec=sh -c ${sh(line)}
+X-GNOME-Autostart-enabled=true
+NoDisplay=true
+`);
+      spawn("sh", ["-c", line], { detached: true, stdio: "ignore" }).unref();
+    }
+  }
+
+  console.log(`
+The Hanyu Easy bridge now starts automatically when you log in, and it is running now in the background.
+
+Pairing token (paste it in Hanyu Easy → Account → AI assistant → Local CLI):
+
+  ${TOKEN}
+
+Show the token again:  node "${INSTALLED}" --token
+Log:                   ${LOG}
+Turn it off:           node "${INSTALLED}" --uninstall
+
+If you install a new AI CLI later, run --install again so the bridge sees it.
+`);
+}
+
+function uninstall() {
+  if (process.platform === "darwin") {
+    const plist = join(homedir(), "Library", "LaunchAgents", `${LABEL}.plist`);
+    run("launchctl", ["bootout", `gui/${process.getuid()}/${LABEL}`]);
+    rmSync(plist, { force: true });
+  } else if (IS_WIN) {
+    const startup = join(process.env.APPDATA ?? join(homedir(), "AppData", "Roaming"), "Microsoft", "Windows", "Start Menu", "Programs", "Startup");
+    rmSync(join(startup, "Hanyu Easy bridge.vbs"), { force: true });
+    stopWindows();
+  } else {
+    const unit = join(homedir(), ".config", "systemd", "user", "hanyu-bridge.service");
+    if (existsSync(unit)) {
+      run("systemctl", ["--user", "disable", "--now", "hanyu-bridge.service"]);
+      rmSync(unit, { force: true });
+      run("systemctl", ["--user", "daemon-reload"]);
+    }
+    rmSync(join(homedir(), ".config", "autostart", "hanyu-bridge.desktop"), { force: true });
+    // stop the background copy, but not this process (its command line names the same file)
+    const pids = (run("pgrep", ["-f", INSTALLED]).stdout || "").split("\n").map(Number).filter((pid) => pid && pid !== process.pid);
+    for (const pid of pids) { try { process.kill(pid); } catch { /* already gone */ } }
+  }
+  console.log("The bridge no longer starts at login and has been stopped. (Your pairing token is kept in ~/.hanyu-bridge.)");
+}
+
+if (argv.includes("--token")) {
+  console.log(TOKEN);
+  process.exit(0);
+}
+if (argv.includes("--install") || argv.includes("--uninstall")) {
+  try {
+    if (argv.includes("--uninstall")) uninstall();
+    else install();
+    process.exit(0);
+  } catch (e) {
+    console.error(`\n${e.message}`);
+    process.exit(1);
+  }
+}
+const tokenOk = (h) => {
+  const got = Buffer.from(String(h ?? "").replace(/^Bearer\s+/i, ""));
+  const want = Buffer.from(TOKEN);
+  return got.length === want.length && timingSafeEqual(got, want);
+};
+
 /* ---------- HTTP ---------- */
 function originAllowed(origin) {
   if (!origin) return true; // not a browser page (e.g. curl); the token still protects it
@@ -298,7 +467,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.on("error", (e) => {
-  console.error(e.code === "EADDRINUSE" ? `Port ${PORT} is already in use. Is the bridge already running? Or pick another with --port.` : e.message);
+  console.error(e.code === "EADDRINUSE" ? `Port ${PORT} is already in use. Is the bridge already running (maybe in the background after --install)? Or pick another with --port.` : e.message);
   process.exit(1);
 });
 server.listen(PORT, "127.0.0.1", () => {
