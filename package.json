@@ -21,12 +21,13 @@
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4.3.5",
-    "@types/node": "^20",
+    "@types/node": "^26.6.11",
     "@types/react": "^19.3.3",
     "@types/react-dom": "^19",
-    "eslint": "^9",
+    "@typescript/typescript6": "^6.0.2",
+    "eslint": "^10.15.0",
     "eslint-config-next": "16.4.6",
     "tailwindcss": "^4.3.5",
-    "typescript": "^5"
+    "typescript": "^7.0.2"
   }
 }
