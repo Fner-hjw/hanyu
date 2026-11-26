@@ -150,6 +150,7 @@ async function handleChat(req, res, body) {
   if (running >= MAX_RUNNING) return json(res, 429, { error: "The bridge is already answering other requests. Try again in a moment." });
 
   running++;
+  const t0 = Date.now();
   const dir = mkdtempSync(join(tmpdir(), "hanyu-bridge-"));
   const cmd = command(cli, { model, effort: ["low", "medium", "high"].includes(effort) ? effort : undefined }, dir, system);
   // Windows runs the CLIs' .cmd shims through the shell, so quote every argument (paths may hold spaces; "" must survive)
@@ -171,6 +172,9 @@ async function handleChat(req, res, body) {
     if (finished) return;
     finished = true;
     running--;
+    // one line per request, so a slow or failing CLI shows up in the terminal / ~/.hanyu-bridge/bridge.log
+    const secs = ((Date.now() - t0) / 1000).toFixed(1);
+    console.log(`${new Date().toISOString()} ${cli}${model ? ` (${model})` : ""}: ${err ? `failed after ${secs} s: ${err}` : `answered in ${secs} s`}`);
     clearTimeout(timer);
     try { rmSync(dir, { recursive: true, force: true }); } catch { /* ignore */ }
     if (err) {
