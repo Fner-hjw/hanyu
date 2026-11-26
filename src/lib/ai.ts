@@ -386,9 +386,34 @@ export type ChatOptions = {
 };
 
 /** Streams a reply; resolves with the full text. Throws AiError with a message fit for the learner. */
-export function chat(cfg: AiConfig, o: ChatOptions): Promise<string> {
-  if (cfg.provider === "local") return localChat(cfg, o);
-  return cfg.provider === "anthropic" ? anthropicChat(cfg, o) : compatChat(cfg, o);
+export async function chat(cfg: AiConfig, o: ChatOptions): Promise<string> {
+  // A request that never answers would leave the page "checking" forever: give up after a quiet spell.
+  // Local tools start slower, and Codex answers all at once at the end, so they get longer.
+  const slow = cfg.provider === "local" || cfg.provider === "ollama";
+  const limit = slow ? 180_000 : 90_000;
+  const ctl = new AbortController();
+  const stop = () => ctl.abort();
+  if (o.signal?.aborted) ctl.abort();
+  o.signal?.addEventListener("abort", stop);
+  let timedOut = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const arm = () => { clearTimeout(timer); timer = setTimeout(() => { timedOut = true; ctl.abort(); }, limit); };
+  arm();
+  const opts: ChatOptions = { ...o, signal: ctl.signal, onText: (t) => { arm(); o.onText?.(t); } };
+  try {
+    if (cfg.provider === "local") return await localChat(cfg, opts);
+    return await (cfg.provider === "anthropic" ? anthropicChat(cfg, opts) : compatChat(cfg, opts));
+  } catch (e) {
+    if (!timedOut) throw e;
+    const name = cfg.provider === "local" && cfg.cli ? LOCAL_CLIS[cfg.cli].name : PROVIDERS[cfg.provider].name;
+    const hint = cfg.provider === "local"
+      ? " Make sure it works in a terminal (you may need to sign in again), and check the bridge log in ~/.hanyu-bridge/bridge.log."
+      : " It may be overloaded: try again, or pick a faster model under Account → AI assistant.";
+    throw new AiError(`${name} didn't answer within ${limit / 60_000} minute${limit > 60_000 ? "s" : ""}, so the request was stopped.${hint}`);
+  } finally {
+    clearTimeout(timer);
+    o.signal?.removeEventListener("abort", stop);
+  }
 }
 
 /** Lists the models the key can use. Also serves as a free "test connection" (no tokens spent). */

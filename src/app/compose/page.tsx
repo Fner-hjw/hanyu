@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Bot, CheckCircle2, RefreshCw, Sparkles } from "lucide-react";
+import { Bot, CheckCircle2, RefreshCw, Sparkles, Square } from "lucide-react";
 import { Marked } from "@/components/Marked";
 import { SpeakButton } from "@/components/Speak";
 import { Badge, PageHeader } from "@/components/ui";
@@ -90,8 +90,16 @@ function Exercise({ task, level, onNext }: { task: Task; level: number; onNext: 
   const [aiBusy, setAiBusy] = useState(false);
   const [aiErr, setAiErr] = useState<string | null>(null);
   const [showEx, setShowEx] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
   const abort = useRef<AbortController | null>(null);
   useEffect(() => () => abort.current?.abort(), []);
+  // seconds counter while the AI is checking, so a slow answer doesn't look frozen
+  useEffect(() => {
+    if (!aiBusy) return;
+    const start = Date.now();
+    const id = setInterval(() => setElapsed(Math.round((Date.now() - start) / 1000)), 1000);
+    return () => { clearInterval(id); setElapsed(0); };
+  }, [aiBusy]);
 
   const a = answer.trim();
   const hanCount = (a.match(HAN) ?? []).length;
@@ -168,7 +176,7 @@ function Exercise({ task, level, onNext }: { task: Task; level: number; onNext: 
       </div>
 
       <div className="card p-3">
-        <textarea value={answer} onChange={(e) => { setAnswer(e.target.value); if (checked) { setChecked(false); setAi(null); setAiRaw(""); } }}
+        <textarea value={answer} onChange={(e) => { setAnswer(e.target.value); if (checked) { abort.current?.abort(); setChecked(false); setAi(null); setAiRaw(""); setAiErr(null); } }}
           rows={2} lang="zh-CN" placeholder="写一个句子…" aria-label="Your sentence"
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); check(); } }}
           className="han w-full resize-none bg-transparent px-2 py-2 text-2xl outline-none" />
@@ -191,7 +199,12 @@ function Exercise({ task, level, onNext }: { task: Task; level: number; onNext: 
               <p className="text-xs text-muted">Other wordings can be just as correct{cfg ? "; see the AI's verdict below" : ""}.</p>
             </div>
           )}
-          {aiBusy && <p className="flex items-center gap-2 text-sm text-muted"><Sparkles size={15} /> Checking with your AI…</p>}
+          {aiBusy && (
+            <p className="flex flex-wrap items-center gap-2 text-sm text-muted" role="status">
+              <Sparkles size={15} className="animate-pulse" /> Checking with your AI…{elapsed >= 3 && <span className="tabular-nums">{elapsed} s</span>}
+              <button type="button" className="btn btn-sm ml-1" onClick={() => abort.current?.abort()}><Square size={12} /> Stop</button>
+            </p>
+          )}
           {aiErr && <p className="text-sm text-accent">{aiErr}</p>}
           {aiRaw && <p className="whitespace-pre-wrap text-sm">{aiRaw}</p>}
           {ai && (
