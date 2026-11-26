@@ -15,7 +15,7 @@ export default function Account() {
   const { email, recovery } = useSync();
   const settings = useAsync(getAuthSettings, []);
   return (
-    <div className="max-w-2xl space-y-5">
+    <div className="space-y-5">
       <PageHeader title="Account & sync" subtitle="Your progress is always saved on this device. Sign in to back it up and use it on your other devices." />
       <Storage />
       {!syncConfigured ? <Setup /> : recovery ? <NewPassword /> : email ? <SignedIn /> : <SignInCard settings={settings.data} loading={settings.loading} />}

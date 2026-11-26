@@ -67,7 +67,7 @@ function Inner() {
   }, [mode, level, round]);
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <PageHeader title="Compose" subtitle="Write your own Chinese sentences and get them checked." />
       <div className="mb-4 flex flex-wrap items-center gap-1.5">
         {MODES.map(([m, label]) => <button key={m} className="chip" data-active={mode === m} onClick={() => setMode(m)}>{label}</button>)}

@@ -66,7 +66,7 @@ export function SpeakingTest({ onExit }: { onExit: () => void }) {
 
   if (!recognitionSupported()) {
     return (
-      <div className="card max-w-xl space-y-3 p-6">
+      <div className="card space-y-3 p-6">
         <p>The speaking test needs speech recognition, which this browser doesn&apos;t support. Try Chrome, Edge or Safari.</p>
         <button className="btn" onClick={onExit}>Back</button>
       </div>

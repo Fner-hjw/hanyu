@@ -14,7 +14,7 @@ export function Contact() {
 
 export function LegalPage({ title, children, other }: { title: string; children: ReactNode; other: { href: string; label: string } }) {
   return (
-    <article className="mx-auto max-w-2xl space-y-6 text-[0.95rem] leading-relaxed">
+    <article className="space-y-6 text-[0.95rem] leading-relaxed">
       <header>
         <h1 className="text-[1.65rem] font-bold tracking-tight">{title}</h1>
         <p className="mt-1 text-sm text-muted">Last updated: {LEGAL_UPDATED}</p>

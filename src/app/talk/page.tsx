@@ -41,7 +41,7 @@ function NotConnected() {
   return (
     <div>
       <PageHeader title="Talk" subtitle="Role-play real situations with an AI partner who corrects you as you go." />
-      <div className="card max-w-xl space-y-3 p-6">
+      <div className="card space-y-3 p-6">
         <div className="flex items-center gap-2 font-semibold"><Bot size={20} /> Connect your AI to start</div>
         <p className="text-sm text-muted">
           The conversation partner uses your own AI account. The quickest free option is a Google Gemini key (free daily allowance, no card needed);
