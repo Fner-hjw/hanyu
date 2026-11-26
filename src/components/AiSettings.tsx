@@ -162,6 +162,7 @@ function LocalSetup({ draft, saved }: { draft: AiConfig | null; saved: AiConfig 
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const origin = typeof window === "undefined" ? "" : window.location.origin;
   const command = `node hanyu-bridge.mjs --origin ${origin}`;
+  const installCommand = `node hanyu-bridge.mjs --install --origin ${origin}`;
   const savedLocal = saved?.provider === "local" ? saved : null;
 
   const save = (c: LocalCli, m: string, text?: string) => {
@@ -209,9 +210,14 @@ function LocalSetup({ draft, saved }: { draft: AiConfig | null; saved: AiConfig 
           <span className="mt-2 flex flex-wrap items-center gap-2">
             <a href="/hanyu-bridge.mjs" download className="btn btn-sm"><Download size={14} /> hanyu-bridge.mjs</a>
           </span>
-          <code className="mt-2 flex items-start gap-2 break-all rounded-lg border border-line bg-card px-3 py-2 font-mono text-xs"><Terminal size={14} className="mt-0.5 shrink-0" />{command}</code>
+          <span className="mt-2 block"><b>Recommended:</b> start it automatically every time you log in. Run this once; it keeps running in the background, with no window to keep open:</span>
+          <code className="mt-1 flex items-start gap-2 break-all rounded-lg border border-line bg-card px-3 py-2 font-mono text-xs"><Terminal size={14} className="mt-0.5 shrink-0" />{installCommand}</code>
+          <span className="mt-2 block text-xs text-muted">
+            Works on macOS, Windows and Linux. To turn it off later, run the command it prints (ending in <code>--uninstall</code>).
+            Or, to run it only for this session, use <code>{command}</code> and keep the terminal open.
+          </span>
         </li>
-        <li>Copy the pairing token it prints, paste it here and test the connection. Keep the terminal open while you practise.</li>
+        <li>Copy the pairing token it prints, paste it here and test the connection.</li>
       </ol>
 
       <label className="block">
