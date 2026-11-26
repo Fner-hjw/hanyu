@@ -151,7 +151,7 @@ function PhrasesTab() {
       {group ? (
         <div className="card p-4 sm:p-5">
           <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-            <p className="max-w-2xl text-sm text-muted">{group.intro}</p>
+            <p className="text-pretty text-sm text-muted">{group.intro}</p>
             <Toggle checked={practice} onChange={(v) => { setPractice(v); setRevealed(new Set()); }}>Practice mode</Toggle>
           </div>
           <ul className="divide-y divide-line">

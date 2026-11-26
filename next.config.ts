@@ -8,7 +8,7 @@ const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/+$/, "") || "h
 /**
  * Content-Security-Policy: limits where the page may load code from and send data to, so an injected
  * script can't ship the learner's AI key or session to another site.
- * - connect-src: our own data, Supabase, the bring-your-own-key AI providers, local Ollama, stroke-order CDNs
+ * - connect-src: our own data, Supabase, the bring-your-own-key AI providers, local Ollama and the local CLI bridge, stroke-order CDNs
  * - media-src: recorded sentence audio on GitHub
  * Inline scripts are allowed because pages are prerendered (nonces would force dynamic rendering);
  * React needs eval only in development.
@@ -31,6 +31,9 @@ const csp = [
     "https://openrouter.ai",
     "http://localhost:11434",
     "http://127.0.0.1:11434",
+    // the local CLI bridge (public/hanyu-bridge.mjs) on its default port
+    "http://localhost:11435",
+    "http://127.0.0.1:11435",
     "https://cdn.jsdelivr.net",
     "https://unpkg.com",
     "https://raw.githubusercontent.com",

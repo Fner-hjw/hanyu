@@ -7,11 +7,17 @@
  *
  * Claude goes through the official Anthropic SDK; the other providers speak the OpenAI-style
  * chat-completions protocol, so they share one small streaming client.
+ *
+ * "Local CLI" uses the AI command-line tools already signed in on the learner's computer (Claude Code,
+ * Codex, Mistral Vibe) through a small bridge script they run themselves (public/hanyu-bridge.mjs),
+ * listening on 127.0.0.1 and protected by a pairing token. Nothing goes through our server.
  */
 import { useSyncExternalStore } from "react";
 
-export type ProviderId = "gemini" | "anthropic" | "openai" | "deepseek" | "openrouter" | "ollama";
-export type AiConfig = { provider: ProviderId; key: string; model: string };
+export type ProviderId = "gemini" | "anthropic" | "openai" | "deepseek" | "openrouter" | "ollama" | "local";
+export type LocalCli = "claude" | "codex" | "vibe";
+/** For "local": key is the bridge's pairing token, model is optional (empty = the CLI's own default). */
+export type AiConfig = { provider: ProviderId; key: string; model: string; cli?: LocalCli; bridge?: string };
 export type ChatMsg = { role: "user" | "assistant"; content: string };
 export type Effort = "low" | "medium" | "high";
 
@@ -96,7 +102,33 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
     defaultModel: "",
     prefer: [/qwen/i, /deepseek/i, /llama/i],
   },
+  local: {
+    name: "Local CLI (Claude Code, Codex, Vibe)",
+    badge: "no API key",
+    blurb: "Use the AI command-line tool already signed in on this computer, with your existing plan.",
+    needsKey: true,
+    keyPlaceholder: "hb_…",
+    defaultModel: "",
+  },
 };
+
+/* ---------- local CLI bridge ---------- */
+export const LOCAL_CLIS: Record<LocalCli, { name: string; install: string; models: { id: string; label: string }[] }> = {
+  claude: {
+    name: "Claude Code",
+    install: "npm install -g @anthropic-ai/claude-code",
+    models: [
+      { id: "", label: "Default (your Claude Code setting)" },
+      { id: "opus", label: "Opus – best quality" },
+      { id: "sonnet", label: "Sonnet – faster" },
+      { id: "haiku", label: "Haiku – fastest, uses the least of your plan" },
+    ],
+  },
+  codex: { name: "OpenAI Codex", install: "npm install -g @openai/codex", models: [{ id: "", label: "Default (your Codex setting)" }] },
+  vibe: { name: "Mistral Vibe", install: "uv tool install mistral-vibe", models: [{ id: "", label: "Default (your Vibe setting)" }] },
+};
+export const DEFAULT_BRIDGE = "http://127.0.0.1:11435";
+export type BridgeHealth = { version: number; clis: Record<LocalCli, { name: string; available: boolean; version?: string }> };
 
 /* ---------- stored config (this device only) ---------- */
 const KEY = "hanyu:ai";
@@ -140,6 +172,7 @@ export function setAiConfig(c: AiConfig | null) {
 /** the saved config if it is complete enough to use, else null */
 export function useAiConfig(): AiConfig | null {
   const c = useSyncExternalStore(subscribe, getSnapshot, () => null);
+  if (c?.provider === "local") return c.key && c.cli ? c : null;
   return c && c.model && (c.key || !PROVIDERS[c.provider].needsKey) ? c : null;
 }
 
@@ -168,6 +201,7 @@ function friendly(status: number | undefined, provider: ProviderId, fallback: st
   return new AiError(fallback);
 }
 function unreachable(provider: ProviderId): AiError {
+  if (provider === "local") return new AiError("Couldn't reach the local bridge. Is `node hanyu-bridge.mjs` running in a terminal on this computer? If your browser asked to allow access to devices on your local network, allow it.");
   if (typeof navigator !== "undefined" && !navigator.onLine) return new AiError("You're offline. The AI assistant needs an internet connection.");
   if (provider === "ollama") return new AiError("Couldn't reach Ollama on this computer. Is it running, with OLLAMA_ORIGINS allowing this site?");
   return new AiError(`Couldn't reach ${PROVIDERS[provider].name}. Check your connection.`);
@@ -280,6 +314,65 @@ async function compatChat(cfg: AiConfig, o: ChatOptions): Promise<string> {
   return text;
 }
 
+/* ---------- local CLI bridge ---------- */
+const bridgeUrl = (cfg: Pick<AiConfig, "bridge">) => (cfg.bridge || DEFAULT_BRIDGE).replace(/\/+$/, "");
+
+async function bridgeFetch(cfg: Pick<AiConfig, "key" | "bridge">, path: string, init: RequestInit = {}): Promise<Response> {
+  let r: Response;
+  try {
+    r = await fetch(`${bridgeUrl(cfg)}${path}`, { ...init, headers: { ...init.headers, Authorization: `Bearer ${cfg.key}` } });
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") throw new AiError("Stopped.");
+    throw unreachable("local");
+  }
+  if (r.status === 401) throw new AiError("The bridge rejected the pairing token. Copy it again from the terminal running the bridge.");
+  if (!r.ok) throw new AiError((await errorText(r)) || `The bridge answered ${r.status}.`);
+  return r;
+}
+
+/** Asks the bridge which CLIs it found. Also the "test connection" for the local provider. */
+export async function bridgeHealth(cfg: Pick<AiConfig, "key" | "bridge">, refresh = false): Promise<BridgeHealth> {
+  const r = await bridgeFetch(cfg, `/health${refresh ? "?refresh=1" : ""}`);
+  const j = (await r.json()) as BridgeHealth & { bridge?: string };
+  if (j.bridge !== "hanyu") throw new AiError("Something else is answering on that address, not the Hanyu bridge.");
+  return j;
+}
+
+async function localChat(cfg: AiConfig, o: ChatOptions): Promise<string> {
+  const r = await bridgeFetch(cfg, "/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ cli: cfg.cli, model: cfg.model || undefined, system: o.system, messages: o.messages, effort: o.effort }),
+    signal: o.signal,
+  });
+  if (!r.body) throw new AiError("The bridge sent an empty answer.");
+  const reader = r.body.getReader();
+  const dec = new TextDecoder();
+  let buf = "";
+  let text = "";
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split("\n");
+      buf = lines.pop() ?? "";
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        let j: { text?: string; done?: boolean; error?: string };
+        try { j = JSON.parse(line); } catch { continue; }
+        if (j.error) throw new AiError(j.error);
+        if (typeof j.text === "string") { text = j.text; o.onText?.(text); }
+      }
+    }
+  } catch (e) {
+    if (e instanceof AiError) throw e;
+    if (e instanceof DOMException && e.name === "AbortError") throw new AiError("Stopped.");
+    throw unreachable("local");
+  }
+  return text;
+}
+
 /* ---------- public API ---------- */
 export type ChatOptions = {
   system: string;
@@ -294,11 +387,13 @@ export type ChatOptions = {
 
 /** Streams a reply; resolves with the full text. Throws AiError with a message fit for the learner. */
 export function chat(cfg: AiConfig, o: ChatOptions): Promise<string> {
+  if (cfg.provider === "local") return localChat(cfg, o);
   return cfg.provider === "anthropic" ? anthropicChat(cfg, o) : compatChat(cfg, o);
 }
 
 /** Lists the models the key can use. Also serves as a free "test connection" (no tokens spent). */
 export async function listModels(cfg: Pick<AiConfig, "provider" | "key">): Promise<string[]> {
+  if (cfg.provider === "local") return Object.keys((await bridgeHealth(cfg)).clis);
   if (cfg.provider === "anthropic") {
     try {
       const { client } = await anthropicClient(cfg.key);
